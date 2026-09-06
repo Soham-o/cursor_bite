@@ -1,0 +1,199 @@
+/* ==========================================================================
+   Cursor Bite Design System - Design Tokens
+   Unified token architecture for Light and Dark modes.
+   Layout, sizing, typography, and interaction states remain strictly identical.
+   ========================================================================== */
+
+:root {
+  /* --- Typography --- */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, 'Courier New', monospace;
+  
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 13.5px;
+  --font-size-md: 14.5px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 22px;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.45;
+  --line-height-relaxed: 1.6;
+
+  /* --- Spacing --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* --- Border Radii --- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+
+  /* --- Dimensions (Cursor Bite Overlay) --- */
+  --radial-size: 206px;
+  --radial-center-size: 42px;
+  --result-panel-width: 345px;
+  --result-panel-max-height: 480px;
+
+  /* --- Motion & Transitions --- */
+  --duration-fast: 120ms;
+  --duration-normal: 160ms;
+  --duration-panel: 190ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Universal Accents --- */
+  --accent-purple: #6366F1;
+  --accent-purple-light: #818CF8;
+  --accent-purple-glow: rgba(99, 102, 241, 0.35);
+  --accent-blue: #38BDF8;
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-error: #EF4444;
+  --selection-color: rgba(99, 102, 241, 0.22);
+}
+
+/* --------------------------------------------------------------------------
+   LIGHT MODE (Default)
+   Clean, airy host application + darker contrast overlay utility
+   -------------------------------------------------------------------------- */
+:root, [data-theme="light"] {
+  /* Host Application (YouTube) Tokens */
+  --host-bg: #F9F9F9;
+  --host-surface: #FFFFFF;
+  --host-surface-hover: #F2F2F2;
+  --host-border: #E5E5E5;
+  --host-text-primary: #0F0F0F;
+  --host-text-secondary: #606060;
+  --host-text-muted: #909090;
+  --host-input-bg: #FFFFFF;
+  --host-input-border: #CCCCCC;
+  --host-badge-bg: #F2F2F2;
+  --host-badge-text: #0F0F0F;
+  --host-pill-bg: rgba(0, 0, 0, 0.05);
+  --host-pill-hover: rgba(0, 0, 0, 0.1);
+  --host-selection-bg: #D4E2FF;
+  --host-selection-text: #0F0F0F;
+
+  /* Cursor Bite Overlay Tokens (Native Floating Desktop Utility) */
+  --cb-overlay-backdrop: transparent;
+  --cb-hud-bg: #14161C;
+  --cb-hud-border: rgba(255, 255, 255, 0.12);
+  --cb-hud-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  
+  --cb-sector-bg: rgba(255, 255, 255, 0.03);
+  --cb-sector-hover: rgba(99, 102, 241, 0.22);
+  --cb-sector-active: rgba(99, 102, 241, 0.35);
+  --cb-sector-divider: rgba(255, 255, 255, 0.07);
+  --cb-sector-icon: #D1D5DB;
+  --cb-sector-icon-hover: #FFFFFF;
+  --cb-sector-num: #9CA3AF;
+  --cb-sector-num-hover: #E0E7FF;
+
+  --cb-center-bg: #0F1117;
+  --cb-center-ring: rgba(99, 102, 241, 0.6);
+  --cb-center-glow: 0 0 18px rgba(99, 102, 241, 0.5), inset 0 0 10px rgba(99, 102, 241, 0.3);
+
+  --cb-panel-bg: #12141A;
+  --cb-panel-surface-elevated: #1B1E28;
+  --cb-panel-border: rgba(255, 255, 255, 0.10);
+  --cb-panel-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --cb-panel-text-primary: #F8FAFC;
+  --cb-panel-text-secondary: #94A3B8;
+  --cb-panel-text-muted: #64748B;
+  
+  --cb-quote-bg: rgba(99, 102, 241, 0.08);
+  --cb-quote-border: #6366F1;
+  --cb-quote-text: #E2E8F0;
+
+  --cb-btn-bg: rgba(255, 255, 255, 0.06);
+  --cb-btn-hover: rgba(255, 255, 255, 0.12);
+  --cb-btn-text: #E2E8F0;
+
+  --cb-pill-bg: #14161C;
+  --cb-pill-border: rgba(255, 255, 255, 0.12);
+  --cb-pill-text: #E2E8F0;
+  --cb-pill-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+
+  --cb-toast-bg: #14161C;
+  --cb-toast-border: rgba(255, 255, 255, 0.12);
+  --cb-toast-text: #FFFFFF;
+  --cb-toast-badge: rgba(255, 255, 255, 0.12);
+}
+
+/* --------------------------------------------------------------------------
+   DARK MODE
+   Deep charcoal / obsidian host + refined, elevated dark desktop utility
+   -------------------------------------------------------------------------- */
+[data-theme="dark"] {
+  /* Host Application (YouTube Dark) Tokens */
+  --host-bg: #0F0F0F;
+  --host-surface: #171717;
+  --host-surface-hover: #272727;
+  --host-border: #2B2B2B;
+  --host-text-primary: #F1F1F1;
+  --host-text-secondary: #AAAAAA;
+  --host-text-muted: #717171;
+  --host-input-bg: #121212;
+  --host-input-border: #333333;
+  --host-badge-bg: #272727;
+  --host-badge-text: #F1F1F1;
+  --host-pill-bg: rgba(255, 255, 255, 0.1);
+  --host-pill-hover: rgba(255, 255, 255, 0.18);
+  --host-selection-bg: rgba(99, 102, 241, 0.35);
+  --host-selection-text: #FFFFFF;
+
+  /* Cursor Bite Overlay Tokens */
+  --cb-overlay-backdrop: transparent;
+  --cb-hud-bg: #111319;
+  --cb-hud-border: rgba(255, 255, 255, 0.14);
+  --cb-hud-shadow: 0 16px 44px -8px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(99, 102, 241, 0.15);
+  
+  --cb-sector-bg: rgba(255, 255, 255, 0.04);
+  --cb-sector-hover: rgba(99, 102, 241, 0.28);
+  --cb-sector-active: rgba(99, 102, 241, 0.45);
+  --cb-sector-divider: rgba(255, 255, 255, 0.08);
+  --cb-sector-icon: #E2E8F0;
+  --cb-sector-icon-hover: #FFFFFF;
+  --cb-sector-num: #A0AEC0;
+  --cb-sector-num-hover: #C7D2FE;
+
+  --cb-center-bg: #0C0E14;
+  --cb-center-ring: rgba(129, 140, 248, 0.75);
+  --cb-center-glow: 0 0 22px rgba(99, 102, 241, 0.65), inset 0 0 12px rgba(129, 140, 248, 0.4);
+
+  --cb-panel-bg: #141720;
+  --cb-panel-surface-elevated: #1E222E;
+  --cb-panel-border: rgba(255, 255, 255, 0.12);
+  --cb-panel-shadow: 0 24px 54px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(99, 102, 241, 0.18);
+  --cb-panel-text-primary: #FFFFFF;
+  --cb-panel-text-secondary: #94A3B8;
+  --cb-panel-text-muted: #64748B;
+  
+  --cb-quote-bg: rgba(99, 102, 241, 0.12);
+  --cb-quote-border: #818CF8;
+  --cb-quote-text: #F1F5F9;
+
+  --cb-btn-bg: rgba(255, 255, 255, 0.08);
+  --cb-btn-hover: rgba(255, 255, 255, 0.16);
+  --cb-btn-text: #F1F5F9;
+
+  --cb-pill-bg: #111319;
+  --cb-pill-border: rgba(255, 255, 255, 0.14);
+  --cb-pill-text: #F1F5F9;
+  --cb-pill-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+
+  --cb-toast-bg: #111319;
+  --cb-toast-border: rgba(255, 255, 255, 0.14);
+  --cb-toast-text: #FFFFFF;
+  --cb-toast-badge: rgba(255, 255, 255, 0.14);
+}

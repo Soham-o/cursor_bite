@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cursor Bite — Intelligence at your cursor</title>
+  <meta name="description" content="A lightweight, privacy-first, local-first Windows AI assistant overlay layered over your host applications.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/host-youtube.css">
+  <link rel="stylesheet" href="styles/activation-toast.css">
+  <link rel="stylesheet" href="styles/radial-menu.css">
+  <link rel="stylesheet" href="styles/result-panel.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+
+  <!-- ====================================================================
+       HOST APPLICATION: Realistic YouTube Desktop Layout
+       ==================================================================== -->
+  <header class="yt-header" id="host-header">
+    <div class="yt-header-left">
+      <button class="yt-menu-btn" aria-label="Guide">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="yt-logo" title="YouTube Home">
+        <svg class="yt-logo-icon" viewBox="0 0 28 20" fill="none">
+          <path d="M27.4 3.1A3.5 3.5 0 0 0 24.9.6C22.7 0 14 0 14 0S5.3 0 3.1.6A3.5 3.5 0 0 0 .6 3.1 36.8 36.8 0 0 0 0 10a36.8 36.8 0 0 0 .6 6.9 3.5 3.5 0 0 0 2.5 2.5C5.3 20 14 20 14 20s8.7 0 10.9-.6a3.5 3.5 0 0 0 2.5-2.5 36.8 36.8 0 0 0 .6-6.9 36.8 36.8 0 0 0-.6-6.9z" fill="#FF0000"/>
+          <path d="M11.2 14.3L18.5 10 11.2 5.7v8.6z" fill="#FFFFFF"/>
+        </svg>
+        <span class="yt-logo-text">YouTube<span class="yt-country-code">IN</span></span>
+      </div>
+    </div>
+
+    <div class="yt-header-center">
+      <form class="yt-search-form" onsubmit="event.preventDefault();">
+        <input type="text" class="yt-search-input" placeholder="Search" value="Harness Engineering AI">
+        <button type="submit" class="yt-search-submit" aria-label="Search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </form>
+      <button class="yt-voice-btn" aria-label="Search with your voice">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="yt-header-right">
+      <button class="yt-icon-btn" aria-label="Create">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="23 7 16 12 23 17 23 7"></polygon>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        </svg>
+      </button>
+      <button class="yt-icon-btn" aria-label="Notifications" style="position: relative;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+      </button>
+      <div class="yt-user-avatar" title="Account">S</div>
+    </div>
+  </header>
+
+  <!-- Video Main Page Container -->
+  <main class="yt-container">
+    
+    <!-- LEFT CONTENT: Video Info, Selection, Comments -->
+    <div class="yt-main-content">
+      
+      <!-- Video Title -->
+      <h1 class="yt-video-title">Harness Engineering Explained in 20 Mins!</h1>
+
+      <!-- Channel & Actions Row -->
+      <div class="yt-action-bar">
+        <div class="yt-channel-info">
+          <div class="yt-channel-avatar" style="overflow: hidden; background: #581C87;">
+            <svg viewBox="0 0 40 40" width="40" height="40">
+              <defs>
+                <linearGradient id="avatarGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#701A75"/>
+                  <stop offset="100%" stop-color="#4A044E"/>
+                </linearGradient>
+              </defs>
+              <rect width="40" height="40" fill="url(#avatarGrad)"/>
+              <circle cx="20" cy="15" r="7" fill="#FBCFE8"/>
+              <path d="M10 36 C10 26, 30 26, 30 36 Z" fill="#831843"/>
+              <!-- Hair -->
+              <path d="M12 16 C12 8, 28 8, 28 16 C28 22, 26 25, 26 25 C24 16, 16 16, 14 25 C14 25, 12 22, 12 16 Z" fill="#1C1917"/>
+            </svg>
+          </div>
+          <div class="yt-channel-meta">
+            <div class="yt-channel-name">
+              <span>Aishwarya Srinivasan</span>
+              <svg class="yt-verified-badge" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <span class="yt-channel-subs">178K subscribers</span>
+          </div>
+          <button class="yt-subscribe-btn">Subscribe</button>
+        </div>
+
+        <div class="yt-video-actions">
+          <div class="yt-pill-group">
+            <button class="yt-pill-btn" aria-label="Like">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+              </svg>
+              <span>815</span>
+            </button>
+            <div class="yt-pill-divider"></div>
+            <button class="yt-pill-btn" aria-label="Dislike">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path>
+              </svg>
+            </button>
+          </div>
+
+          <button class="yt-pill-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            <span>Share</span>
+          </button>
+
+          <button class="yt-pill-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Download</span>
+          </button>
+
+          <button class="yt-pill-btn" aria-label="More actions">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="19" cy="12" r="1"></circle>
+              <circle cx="5" cy="12" r="1"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Description Box with realistic text selection -->
+      <div class="yt-description-box" id="yt-description">
+        <div class="yt-description-meta">
+          <span>119,784 views</span>
+          <span>Aug 29, 2026</span>
+        </div>
+
+        <div class="yt-description-text">
+          <!-- Text selection that Cursor Bite operates on -->
+          <span class="yt-selected-highlight" title="Selected Text • Active context for Cursor Bite">The most important thing in AI right now has nothing to do with picking the right models. The model is becoming a commodity. The teams shipping the most impressive AI systems will tell you that the secret is actually Harness Engineering.</span>
+          <br><br>
+          In this video, I break down what Harness Engineering in actually is, why a raw Large Language Model is fundamentally handicapped without one, and how this discipline is separating AI demos from real AI products.
+        </div>
+
+        <div class="yt-description-sponsor">PS- This video is sponsored by Granola</div>
+        <div class="yt-description-more">...more</div>
+      </div>
+
+      <!-- Comments Section -->
+      <section class="yt-comments-section">
+        <div class="yt-comments-header">
+          <span class="yt-comments-count">228 Comments</span>
+          <button class="yt-comments-sort">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6"></line>
+              <line x1="4" y1="12" x2="14" y2="12"></line>
+              <line x1="4" y1="18" x2="8" y2="18"></line>
+            </svg>
+            <span>Sort by</span>
+          </button>
+        </div>
+
+        <div class="yt-add-comment-row">
+          <div class="yt-user-avatar" style="width: 36px; height: 36px;">S</div>
+          <input type="text" class="yt-comment-input" placeholder="Add a comment...">
+        </div>
+
+        <!-- Featured Comment matching reference -->
+        <div class="yt-comment-item">
+          <div class="yt-user-avatar" style="width: 36px; height: 36px; background: linear-gradient(135deg, #0284C7, #0EA5E9);">D</div>
+          <div class="yt-comment-content">
+            <div class="yt-comment-author-row">
+              <span class="yt-comment-author">@devansh.ai</span>
+              <span class="yt-comment-date">1 month ago</span>
+            </div>
+            <p class="yt-comment-body">Perfect explanation. Finally someone explained Harness Engineering in simple terms.</p>
+            <div class="yt-comment-actions">
+              <button class="yt-comment-like-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                </svg>
+                <span>142</span>
+              </button>
+              <button class="yt-comment-like-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path>
+                </svg>
+              </button>
+              <button class="yt-comment-reply-btn">Reply</button>
+            </div>
+            <div class="yt-comment-replies-link">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+              <span>3 replies</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT SIDEBAR: Recommended Video Cards -->
+    <aside class="yt-sidebar-content">
+      
+      <!-- Video 1: Building AI Agents from Scratch -->
+      <article class="yt-card">
+        <div class="yt-card-thumb-wrapper">
+          <svg class="yt-card-thumb" viewBox="0 0 168 94">
+            <rect width="168" height="94" fill="#181824"/>
+            <circle cx="120" cy="45" r="28" fill="#F43F5E" opacity="0.8"/>
+            <text x="14" y="38" fill="#FFFFFF" font-family="Inter, sans-serif" font-weight="700" font-size="12">AI Agents</text>
+            <text x="14" y="52" fill="#94A3B8" font-family="Inter, sans-serif" font-size="8.5">From Zero to Production</text>
+            <rect x="14" y="66" width="14" height="14" rx="2" fill="none" stroke="#6366F1" stroke-width="1.5"/>
+          </svg>
+          <span class="yt-card-badge-time">24:31</span>
+        </div>
+        <div class="yt-card-meta">
+          <h2 class="yt-card-title">Building AI Agents from Scratch</h2>
+          <span class="yt-card-channel">Tech With Tim</span>
+          <span class="yt-card-views">89K views • 2 weeks ago</span>
+        </div>
+      </article>
+
+      <!-- Video 2: DeepSeek R1 in 25 Minutes -->
+      <article class="yt-card">
+        <div class="yt-card-thumb-wrapper">
+          <svg class="yt-card-thumb" viewBox="0 0 168 94">
+            <rect width="168" height="94" fill="#0B132B"/>
+            <path d="M125 50 C110 30, 140 20, 145 45 C150 70, 110 80, 125 50" fill="#3B82F6" opacity="0.9"/>
+            <text x="14" y="38" fill="#FFFFFF" font-family="Inter, sans-serif" font-weight="700" font-size="12">DeepSeek R1</text>
+            <text x="14" y="52" fill="#60A5FA" font-family="Inter, sans-serif" font-weight="600" font-size="10">Explained</text>
+          </svg>
+          <span class="yt-card-badge-time">18:47</span>
+        </div>
+        <div class="yt-card-meta">
+          <h2 class="yt-card-title">DeepSeek R1 in 25 Minutes</h2>
+          <span class="yt-card-channel">Neel Nanda</span>
+          <span class="yt-card-views">543K views • 1 month ago</span>
+        </div>
+      </article>
+
+      <!-- Video 3: AI Infrastructure Explained -->
+      <article class="yt-card">
+        <div class="yt-card-thumb-wrapper">
+          <svg class="yt-card-thumb" viewBox="0 0 168 94">
+            <rect width="168" height="94" fill="#231F20"/>
+            <circle cx="110" cy="40" r="16" fill="#F59E0B" opacity="0.7"/>
+            <circle cx="140" cy="45" r="14" fill="#10B981" opacity="0.7"/>
+            <text x="12" y="32" fill="#FFFFFF" font-family="Inter, sans-serif" font-weight="700" font-size="10.5">AI Infrastructure</text>
+            <text x="12" y="46" fill="#D1D5DB" font-family="Inter, sans-serif" font-size="8">GPU, vLLM & LLM-D</text>
+          </svg>
+          <span class="yt-card-badge-time">18:47</span>
+        </div>
+        <div class="yt-card-meta">
+          <h2 class="yt-card-title">AI Infrastructure Explained (GPU, vLLM, and LLM-D)</h2>
+          <span class="yt-card-channel">Tech Nanda</span>
+          <span class="yt-card-views">183K views • 1 month ago</span>
+        </div>
+      </article>
+
+      <!-- Video 4: Why Context is the New Model Size -->
+      <article class="yt-card">
+        <div class="yt-card-thumb-wrapper">
+          <svg class="yt-card-thumb" viewBox="0 0 168 94">
+            <rect width="168" height="94" fill="#111827"/>
+            <circle cx="130" cy="45" r="22" fill="#0284C7" opacity="0.8"/>
+            <text x="14" y="38" fill="#FFFFFF" font-family="Inter, sans-serif" font-weight="700" font-size="11">Context Size</text>
+            <text x="14" y="52" fill="#38BDF8" font-family="Inter, sans-serif" font-size="8.5">Is The New Model Size</text>
+          </svg>
+          <span class="yt-card-badge-time">23:35</span>
+        </div>
+        <div class="yt-card-meta">
+          <h2 class="yt-card-title">Why Context is the New Model Size</h2>
+          <span class="yt-card-channel">Tech Seck Rate</span>
+          <span class="yt-card-views">69K views • 2 months ago</span>
+        </div>
+      </article>
+
+    </aside>
+
+  </main>
+
+  <!-- ====================================================================
+       CURSOR BITE OVERLAY ROOT (Native Desktop Utility Layer)
+       ==================================================================== -->
+  <div id="cb-overlay-root"></div>
+
+  <!-- Interactive Desktop Controls & Review Helper Bar -->
+  <div class="cb-interactive-bar" id="cb-interactive-bar">
+    <button class="cb-trigger-btn" id="cb-trigger-hotkey-btn" title="Simulate pressing Ctrl+Alt+B">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+      </svg>
+      <span>Ctrl + Alt + B</span>
+    </button>
+    <span style="font-size: 11px; opacity: 0.85;">Keys 1–8 | Esc to close</span>
+    <div id="cb-theme-slot"></div>
+  </div>
+
+  <!-- Main JavaScript Application -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

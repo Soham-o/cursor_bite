@@ -1,0 +1,30 @@
+# Cursor Bite — Core Dependencies
+# ============================================================
+# Install with: pip install -r requirements-core.txt
+#
+# The smallest install that gives you a working app: the hotkey, the
+# radial menu, the tray, safe text capture, and the result panel.
+#
+# Every action still runs — each one just reports what it needs if the
+# component behind it is absent, so you can start here and add only the
+# pieces you want.
+#
+# What the rest of requirements.txt buys you:
+#
+#   Translate                    argostranslate  (plus language packs)
+#   Explain / Summarize /
+#     Rewrite / Ask AI           requests        (plus Ollama itself)
+#   Capture Text (OCR)           mss, Pillow, pytesseract
+#                                                (plus Tesseract itself)
+#   Search Web                   requests, beautifulsoup4
+#
+# For everything at once: pip install -r requirements.txt
+
+# ── UI Framework ──────────────────────────────────────────────────
+PyQt6>=6.6.0
+
+# ── Windows Integration ───────────────────────────────────────────
+pywin32>=306
+
+# ── Clipboard (used by every action, to read your selection) ───────
+pyperclip>=1.8.0

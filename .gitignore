@@ -1,0 +1,94 @@
+# Cursor Bite — .gitignore
+# ============================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env
+
+# IDs
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100/
+.fseventsd/
+.Spotlight-V100/
+.TemporaryItems/
+.Trashes/
+.VolumeIcon.icns
+.com.apple.timemachine.donotoffercloudbackup
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Cursor Bite specific
+# Log files (may contain technical data but no sensitive content)
+*.log
+
+# Database (application metadata only — no user content by default)
+*.db
+*.db-wal
+*.db-shm
+
+# Config overrides (user-specific)
+config.local.json
+
+# Build output
+dist/
+build/
+*.exe
+*.msi
+
+# IDE & tools
+.vscode/
+.idea/
+.claude/
+*.sublime-project
+*.sublime-workspace
+
+# Node dependencies
+node_modules/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# OS-specific
+.cache/

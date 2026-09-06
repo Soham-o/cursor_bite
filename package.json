@@ -1,0 +1,20 @@
+{
+  "name": "cursor-bite-ui",
+  "version": "1.0.0",
+  "description": "Cursor Bite - Production-quality desktop AI overlay UI with real-time Ollama streaming and live DuckDuckGo search",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "cursor-bite",
+    "ai-assistant",
+    "desktop-overlay",
+    "radial-menu",
+    "ollama",
+    "local-ai"
+  ],
+  "author": "Cursor Bite Team",
+  "license": "MIT"
+}

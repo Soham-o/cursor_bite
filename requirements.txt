@@ -1,0 +1,39 @@
+# Cursor Bite — Python Dependencies
+# ============================================================
+# Install with: pip install -r requirements.txt
+#
+# All dependencies are free and open-source.
+# No paid APIs or services required.
+
+# ── UI Framework ──────────────────────────────────────────────────
+PyQt6>=6.6.0
+
+# ── Windows Integration ───────────────────────────────────────────
+pywin32>=306
+
+# ── Screen Capture ────────────────────────────────────────────────
+mss>=9.0.0
+
+# ── Image Processing ──────────────────────────────────────────────
+Pillow>=10.0.0
+
+# ── OCR ───────────────────────────────────────────────────────────
+pytesseract>=0.3.10
+
+# ── Translation (Offline) ─────────────────────────────────────────
+argostranslate>=1.8.0
+langdetect>=1.0.9
+
+# ── Clipboard ─────────────────────────────────────────────────────
+pyperclip>=1.8.0
+
+# ── Web Search (optional, free) ───────────────────────────────────
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+ddgs>=9.16.0
+
+# ── AI (optional, local) ──────────────────────────────────────────
+# Ollama is installed separately from https://ollama.com
+# The `ollama` Python package is optional:
+# ollama>=0.1.0
+

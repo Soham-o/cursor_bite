@@ -1,0 +1,267 @@
+/* ==========================================================================
+   Result Panel Styling - Cursor Bite
+   Compact, floating dark charcoal result card positioned beside cursor.
+   Native desktop utility aesthetics matching the reference image.
+   ========================================================================== */
+
+.cb-result-panel {
+  position: fixed;
+  z-index: 10002;
+  width: var(--result-panel-width);
+  max-height: var(--result-panel-max-height);
+  background: var(--cb-panel-bg);
+  color: var(--cb-panel-text-primary);
+  border: 1px solid var(--cb-panel-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--cb-panel-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+  transition: opacity var(--duration-panel) var(--ease-out), transform var(--duration-panel) var(--ease-out);
+  pointer-events: auto;
+  user-select: text;
+}
+
+.cb-result-panel.cb-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.cb-result-panel.cb-closing {
+  opacity: 0;
+  transform: translateY(4px) scale(0.98);
+  pointer-events: none;
+}
+
+.cb-result-panel.cb-pinned {
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: var(--cb-panel-shadow), 0 0 0 1px rgba(99, 102, 241, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   Result Header (Icon, Title, Pin, Close)
+   -------------------------------------------------------------------------- */
+.cb-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: grab;
+  user-select: none;
+}
+
+.cb-result-header:active {
+  cursor: grabbing;
+}
+
+.cb-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cb-header-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FBBF24; /* amber/yellow for explain, dynamic for others */
+}
+
+.cb-header-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--cb-panel-text-primary);
+  letter-spacing: -0.1px;
+}
+
+.cb-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cb-header-btn {
+  background: transparent;
+  border: none;
+  color: var(--cb-panel-text-secondary);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.cb-header-btn:hover {
+  color: var(--cb-panel-text-primary);
+  background-color: var(--cb-btn-bg);
+}
+
+.cb-header-btn.is-active {
+  color: var(--accent-purple-light);
+  background-color: rgba(99, 102, 241, 0.18);
+}
+
+/* --------------------------------------------------------------------------
+   Result Content Area
+   -------------------------------------------------------------------------- */
+.cb-result-content {
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--cb-panel-text-primary);
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Custom Minimal Scrollbar */
+.cb-result-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.cb-result-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cb-result-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.cb-result-content p {
+  margin: 0;
+  color: #E2E8F0;
+  font-size: 13px;
+}
+
+/* Callout Quote Box (matching reference image) */
+.cb-callout-quote {
+  background: var(--cb-panel-surface-elevated);
+  border-left: 3px solid var(--accent-purple);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--cb-quote-text);
+  line-height: 1.45;
+  margin: 2px 0;
+}
+
+/* Bullet list */
+.cb-bullet-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.cb-bullet-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #E2E8F0;
+  line-height: 1.4;
+}
+
+.cb-bullet-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background-color: var(--accent-purple-light);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Result Footer (Copy, Esc Hint, Latency & Status)
+   -------------------------------------------------------------------------- */
+.cb-result-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11.5px;
+  color: var(--cb-panel-text-secondary);
+  background: rgba(0, 0, 0, 0.15);
+  user-select: none;
+}
+
+.cb-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: var(--cb-panel-text-secondary);
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: var(--radius-xs);
+  font-size: 11.5px;
+  font-weight: 500;
+  transition: color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.cb-copy-btn:hover {
+  color: var(--cb-panel-text-primary);
+  background-color: var(--cb-btn-bg);
+}
+
+.cb-copy-btn.cb-copied {
+  color: var(--status-success);
+}
+
+.cb-footer-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cb-esc-hint {
+  color: var(--cb-panel-text-muted);
+  font-size: 11px;
+}
+
+.cb-latency-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cb-panel-text-secondary);
+}
+
+.cb-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background-color: var(--status-success);
+  display: inline-block;
+}
+
+.cb-status-dot.status-working {
+  background-color: var(--status-warning);
+  animation: cb-dot-pulse 1.2s infinite ease-in-out;
+}
+
+.cb-status-dot.status-failed {
+  background-color: var(--status-error);
+}
+
+@keyframes cb-dot-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); }
+}

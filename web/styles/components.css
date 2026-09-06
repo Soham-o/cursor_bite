@@ -1,0 +1,427 @@
+/* ==========================================================================
+   Components Styling - Cursor Bite
+   Status pill, Theme Switcher, Privacy Indicators, Loading & Error states.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Bottom-Right Status Pill (matching reference image)
+   -------------------------------------------------------------------------- */
+.cb-status-pill {
+  position: fixed;
+  bottom: 20px;
+  right: 24px;
+  z-index: 9990;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--cb-pill-bg);
+  border: 1px solid var(--cb-pill-border);
+  border-radius: var(--radius-full);
+  box-shadow: var(--cb-pill-shadow);
+  color: var(--cb-pill-text);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--duration-fast), background-color var(--duration-fast), border-color var(--duration-fast);
+}
+
+.cb-status-pill:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.cb-status-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--status-success);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   Interactive Helper Bar (Simulated Windows Desktop Controls)
+   Provides effortless review experience and hotkey triggers
+   -------------------------------------------------------------------------- */
+.cb-interactive-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 24px;
+  z-index: 9990;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--cb-hud-bg);
+  border: 1px solid var(--cb-hud-border);
+  border-radius: var(--radius-full);
+  padding: 4px 6px 4px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-size: 12px;
+  color: var(--cb-panel-text-secondary);
+}
+
+.cb-trigger-btn {
+  background: var(--accent-purple);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity var(--duration-fast), transform var(--duration-fast);
+}
+
+.cb-trigger-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.cb-trigger-btn:active {
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   Theme Switcher Button
+   -------------------------------------------------------------------------- */
+.cb-theme-btn {
+  background: var(--cb-btn-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--cb-panel-text-primary);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+
+.cb-theme-btn:hover {
+  background-color: var(--cb-btn-hover);
+}
+
+/* --------------------------------------------------------------------------
+   Privacy Visual Language (Local-first, offline, external notice)
+   -------------------------------------------------------------------------- */
+.cb-privacy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  background: rgba(16, 185, 129, 0.12);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  letter-spacing: 0.1px;
+}
+
+.cb-privacy-badge.privacy-external {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38BDF8;
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.cb-privacy-badge.privacy-protected {
+  background: rgba(129, 140, 248, 0.12);
+  color: #A5B4FC;
+  border-color: rgba(129, 140, 248, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   Loading State (Subtle Shimmer & Streaming Indicator)
+   -------------------------------------------------------------------------- */
+.cb-loading-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.cb-loading-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--cb-panel-text-muted);
+}
+
+.cb-loading-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  border-top-color: var(--accent-purple-light);
+  border-radius: var(--radius-full);
+  animation: cb-spin 0.7s linear infinite;
+}
+
+@keyframes cb-spin {
+  to { transform: rotate(360deg); }
+}
+
+.cb-shimmer-line {
+  height: 12px;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.04) 75%);
+  background-size: 200% 100%;
+  animation: cb-shimmer 1.5s infinite ease-in-out;
+}
+
+.cb-shimmer-line.w-80 { width: 80%; }
+.cb-shimmer-line.w-60 { width: 60%; }
+.cb-shimmer-line.w-95 { width: 95%; }
+
+@keyframes cb-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.cb-streaming-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background-color: var(--accent-purple-light);
+  vertical-align: -2px;
+  margin-left: 2px;
+  animation: cb-cursor-blink 0.8s infinite;
+}
+
+@keyframes cb-cursor-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   Error State (Informative, Actionable)
+   Explains: WHAT happened, WHY it happened, WHAT user can do
+   -------------------------------------------------------------------------- */
+.cb-error-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.cb-error-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #F87171;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.cb-error-desc {
+  font-size: 12px;
+  color: #CBD5E1;
+  line-height: 1.45;
+}
+
+.cb-error-action-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+  background: rgba(239, 68, 68, 0.18);
+  color: #FCA5A5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-xs);
+  padding: 5px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+
+.cb-error-action-btn:hover {
+  background: rgba(239, 68, 68, 0.28);
+}
+
+/* --------------------------------------------------------------------------
+   Action-Specific View Styles (Translate, Search, Settings, Rewrite)
+   -------------------------------------------------------------------------- */
+.cb-search-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  background: var(--cb-panel-surface-elevated);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cb-search-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #93C5FD;
+  text-decoration: none;
+}
+
+.cb-search-title:hover {
+  text-decoration: underline;
+}
+
+.cb-search-snippet {
+  font-size: 11.5px;
+  color: #94A3B8;
+  line-height: 1.35;
+}
+
+.cb-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 12px;
+}
+
+.cb-settings-row:last-child {
+  border-bottom: none;
+}
+
+.cb-settings-label {
+  color: #E2E8F0;
+  font-weight: 500;
+}
+
+.cb-settings-value {
+  color: var(--accent-purple-light);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+/* --------------------------------------------------------------------------
+   Real-Time Context Editor & Presets
+   -------------------------------------------------------------------------- */
+.cb-context-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--cb-btn-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+  font-size: 11px;
+  color: var(--cb-panel-text-secondary);
+  cursor: pointer;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color var(--duration-fast), color var(--duration-fast);
+}
+
+.cb-context-pill:hover {
+  background: var(--cb-btn-hover);
+  color: var(--cb-panel-text-primary);
+}
+
+.cb-context-modal {
+  position: fixed;
+  bottom: 60px;
+  left: 24px;
+  z-index: 9995;
+  width: 440px;
+  background: var(--cb-panel-bg);
+  border: 1px solid var(--cb-panel-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+}
+
+.cb-context-modal.cb-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.cb-context-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--cb-panel-text-primary);
+}
+
+.cb-context-textarea {
+  width: 100%;
+  height: 85px;
+  background: var(--cb-panel-surface-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #F1F5F9;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+}
+
+.cb-context-textarea:focus {
+  border-color: var(--accent-purple);
+}
+
+.cb-context-presets {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cb-preset-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  padding: 2px 8px;
+  font-size: 10.5px;
+  color: var(--cb-panel-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+
+.cb-preset-chip:hover {
+  background: rgba(99, 102, 241, 0.2);
+  color: #FFFFFF;
+}
+
+.cb-context-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cb-ollama-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  color: #10B981;
+}
+
+.cb-apply-context-btn {
+  background: var(--accent-purple);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-xs);
+  padding: 4px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+

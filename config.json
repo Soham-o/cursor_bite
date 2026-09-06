@@ -1,0 +1,35 @@
+{
+    "hotkey": {
+        "main": "Ctrl+Alt+B"
+    },
+    "translation": {
+        "default_target_language": "en",
+        "auto_detect_source": true,
+        "offline_only": true
+    },
+    "ai": {
+        "enabled": true,
+        "model": "llama3.2",
+        "temperature": 0.7,
+        "timeout_seconds": 56
+    },
+    "privacy": {
+        "offline_mode": false,
+        "no_data_retention": true,
+        "clipboard_protection": true,
+        "screenshot_retention": false,
+        "sensitive_data_protection": true,
+        "external_processing_warning": false
+    },
+    "ui": {
+        "menu_size": 170,
+        "animation_speed": 150,
+        "opacity": 0.95,
+        "position_behavior": "smart"
+    },
+    "general": {
+        "start_with_windows": false,
+        "enabled": true,
+        "animations": true
+    }
+}

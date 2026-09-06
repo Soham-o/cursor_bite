@@ -1,0 +1,595 @@
+/* ==========================================================================
+   Host Application Styling - YouTube Desktop Clone
+   Provides realistic, unbloated host context matching the reference image.
+   Supports Light Mode and Dark Mode with zero layout shift.
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--host-bg);
+  color: var(--host-text-primary);
+  line-height: var(--line-height-normal);
+  font-size: var(--font-size-base);
+  overflow-x: hidden;
+  transition: background-color var(--duration-normal) var(--ease-out), color var(--duration-normal) var(--ease-out);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Top Navigation Bar --- */
+.yt-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+  background-color: var(--host-surface);
+  border-bottom: 1px solid var(--host-border);
+  transition: background-color var(--duration-normal) var(--ease-out), border-color var(--duration-normal) var(--ease-out);
+}
+
+.yt-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.yt-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--host-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  transition: background-color var(--duration-fast);
+}
+
+.yt-menu-btn:hover {
+  background-color: var(--host-surface-hover);
+}
+
+.yt-logo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--host-text-primary);
+  cursor: pointer;
+}
+
+.yt-logo-icon {
+  width: 28px;
+  height: 20px;
+}
+
+.yt-logo-text {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.yt-country-code {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--host-text-muted);
+  margin-left: 2px;
+  margin-top: -2px;
+}
+
+/* Center Search */
+.yt-header-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 1 640px;
+  margin: 0 20px;
+}
+
+.yt-search-form {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+}
+
+.yt-search-input {
+  flex: 1;
+  height: 100%;
+  padding: 0 16px;
+  font-size: 15px;
+  color: var(--host-text-primary);
+  background-color: var(--host-input-bg);
+  border: 1px solid var(--host-input-border);
+  border-right: none;
+  border-radius: 20px 0 0 20px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color var(--duration-fast);
+}
+
+.yt-search-input:focus {
+  border-color: #1C62B9;
+}
+
+.yt-search-submit {
+  width: 64px;
+  height: 100%;
+  background-color: var(--host-surface-hover);
+  border: 1px solid var(--host-input-border);
+  border-radius: 0 20px 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--host-text-primary);
+}
+
+.yt-voice-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background-color: var(--host-surface-hover);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--host-text-primary);
+}
+
+/* Right Controls */
+.yt-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.yt-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: none;
+  border: none;
+  color: var(--host-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+
+.yt-icon-btn:hover {
+  background-color: var(--host-surface-hover);
+}
+
+.yt-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, #4F46E5, #06B6D4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* --- Main Layout Grid --- */
+.yt-container {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 24px 24px 60px;
+  display: grid;
+  grid-template-columns: 1fr 390px;
+  gap: 28px;
+}
+
+/* --- Video Content Column (Left) --- */
+.yt-main-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.yt-video-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--host-text-primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.2px;
+}
+
+/* Channel & Video Actions Bar */
+.yt-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.yt-channel-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.yt-channel-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, #E11D48, #9333EA);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.yt-channel-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.yt-channel-name {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--host-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.yt-verified-badge {
+  color: var(--host-text-secondary);
+  width: 14px;
+  height: 14px;
+}
+
+.yt-channel-subs {
+  font-size: 12px;
+  color: var(--host-text-secondary);
+}
+
+.yt-subscribe-btn {
+  background-color: var(--host-text-primary);
+  color: var(--host-surface);
+  border: none;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 18px;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  margin-left: 12px;
+  transition: opacity var(--duration-fast);
+}
+
+.yt-subscribe-btn:hover {
+  opacity: 0.9;
+}
+
+/* Actions Right */
+.yt-video-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.yt-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  background-color: var(--host-pill-bg);
+  border: none;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--host-text-primary);
+  cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+
+.yt-pill-btn:hover {
+  background-color: var(--host-pill-hover);
+}
+
+.yt-pill-group {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--host-pill-bg);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.yt-pill-group .yt-pill-btn {
+  background: transparent;
+  border-radius: 0;
+  padding: 0 12px;
+}
+
+.yt-pill-divider {
+  width: 1px;
+  height: 20px;
+  background-color: var(--host-border);
+}
+
+/* --- Description Box --- */
+.yt-description-box {
+  background-color: var(--host-surface-hover);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  transition: background-color var(--duration-normal);
+}
+
+.yt-description-meta {
+  font-weight: 600;
+  color: var(--host-text-primary);
+  margin-bottom: 8px;
+  display: flex;
+  gap: 10px;
+}
+
+.yt-description-text {
+  color: var(--host-text-primary);
+  white-space: pre-line;
+}
+
+/* Natural Text Selection highlighting */
+.yt-selected-highlight {
+  background-color: var(--host-selection-bg);
+  color: var(--host-selection-text);
+  border-radius: 2px;
+  padding: 1px 0;
+  position: relative;
+}
+
+.yt-description-sponsor {
+  margin-top: 14px;
+  color: var(--host-text-secondary);
+  font-weight: 500;
+}
+
+.yt-description-more {
+  margin-top: 8px;
+  font-weight: 600;
+  color: var(--host-text-secondary);
+  cursor: pointer;
+}
+
+/* --- Comments Section --- */
+.yt-comments-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.yt-comments-header {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.yt-comments-count {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--host-text-primary);
+}
+
+.yt-comments-sort {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--host-text-primary);
+  cursor: pointer;
+}
+
+.yt-add-comment-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 8px 0;
+}
+
+.yt-comment-input {
+  flex: 1;
+  border: none;
+  border-bottom: 1px solid var(--host-border);
+  background: transparent;
+  padding: 6px 0;
+  font-size: 13.5px;
+  color: var(--host-text-primary);
+  outline: none;
+  font-family: inherit;
+}
+
+.yt-comment-item {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.yt-comment-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.yt-comment-author-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.yt-comment-author {
+  font-weight: 600;
+  color: var(--host-text-primary);
+}
+
+.yt-comment-date {
+  color: var(--host-text-secondary);
+}
+
+.yt-comment-body {
+  font-size: 13.5px;
+  color: var(--host-text-primary);
+  line-height: 1.4;
+}
+
+.yt-comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--host-text-secondary);
+}
+
+.yt-comment-like-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.yt-comment-reply-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.yt-comment-replies-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: #065FD4;
+  cursor: pointer;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-theme="dark"] .yt-comment-replies-link {
+  color: #3EA6FF;
+}
+
+/* --- Recommended Sidebar (Right) --- */
+.yt-sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.yt-card {
+  display: flex;
+  gap: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  transition: background-color var(--duration-fast);
+}
+
+.yt-card:hover {
+  background-color: var(--host-surface-hover);
+}
+
+.yt-card-thumb-wrapper {
+  position: relative;
+  width: 168px;
+  height: 94px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background-color: #1a1a1a;
+}
+
+.yt-card-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.yt-card-badge-time {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background-color: rgba(0, 0, 0, 0.82);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.yt-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.yt-card-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--host-text-primary);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.yt-card-channel {
+  font-size: 12px;
+  color: var(--host-text-secondary);
+}
+
+.yt-card-views {
+  font-size: 12px;
+  color: var(--host-text-secondary);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 1100px) {
+  .yt-container {
+    grid-template-columns: 1fr;
+  }
+  .yt-sidebar-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}

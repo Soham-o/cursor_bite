@@ -1,0 +1,212 @@
+/* ==========================================================================
+   Radial Menu HUD Styling - Cursor Bite
+   Compact 180-220px diameter radial HUD with 8 sectors, labels, and glowing core.
+   High-performance SVG / CSS polar geometry with zero visual clutter.
+   ========================================================================== */
+
+.cb-radial-container {
+  position: fixed;
+  z-index: 9999;
+  width: var(--radial-size);
+  height: var(--radial-size);
+  border-radius: var(--radius-full);
+  pointer-events: auto;
+  user-select: none;
+  transform: translate(-50%, -50%) scale(0.96);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+  filter: drop-shadow(0 14px 36px rgba(0, 0, 0, 0.65));
+}
+
+.cb-radial-container.cb-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.cb-radial-container.cb-closing {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.92);
+  pointer-events: none;
+}
+
+/* SVG Base Layer */
+.cb-radial-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Outer HUD Frame */
+.cb-hud-outer-ring {
+  fill: #141720;
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1.2px;
+}
+
+[data-theme="dark"] .cb-hud-outer-ring {
+  fill: #101218;
+  stroke: rgba(255, 255, 255, 0.16);
+}
+
+/* Sector Slices */
+.cb-sector {
+  fill: rgba(255, 255, 255, 0.035);
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1px;
+  cursor: pointer;
+  transition: fill var(--duration-fast) var(--ease-out), filter var(--duration-fast) var(--ease-out);
+}
+
+.cb-sector:hover,
+.cb-sector-group:hover .cb-sector,
+.cb-sector-group.cb-selected .cb-sector {
+  fill: rgba(99, 102, 241, 0.28);
+}
+
+.cb-sector-group.cb-selected .cb-sector {
+  fill: rgba(99, 102, 241, 0.35);
+  stroke: rgba(129, 140, 248, 0.6);
+}
+
+/* Subdued state when another sector is hovered */
+.cb-radial-container.has-hovered-sector .cb-sector-group:not(:hover):not(.cb-selected) .cb-sector {
+  opacity: 0.6;
+}
+
+/* Micro Shortcut Number [1] - [8] */
+.cb-sector-num {
+  font-family: var(--font-sans);
+  font-size: 8px;
+  font-weight: 700;
+  fill: #94A3B8;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  letter-spacing: -0.2px;
+  transition: fill var(--duration-fast) var(--ease-out);
+}
+
+.cb-sector-group:hover .cb-sector-num,
+.cb-sector-group.cb-selected .cb-sector-num {
+  fill: #FFFFFF;
+}
+
+/* Sector Icons */
+.cb-sector-icon {
+  fill: none;
+  stroke: #CBD5E1;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke var(--duration-fast) var(--ease-out);
+  pointer-events: none;
+}
+
+.cb-sector-group:hover .cb-sector-icon,
+.cb-sector-group.cb-selected .cb-sector-icon {
+  stroke: #FFFFFF;
+}
+
+/* Sector Label (Visible like in reference) */
+.cb-sector-label {
+  font-family: var(--font-sans);
+  font-size: 7.2px;
+  font-weight: 600;
+  fill: #94A3B8;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  letter-spacing: -0.1px;
+  transition: fill var(--duration-fast) var(--ease-out);
+}
+
+.cb-sector-group:hover .cb-sector-label,
+.cb-sector-group.cb-selected .cb-sector-label {
+  fill: #FFFFFF;
+}
+
+/* --------------------------------------------------------------------------
+   Radial Center - Circular Interaction Core (NO mouse graphic)
+   Subtle purple/blue glow, soft concentric outer rings
+   -------------------------------------------------------------------------- */
+.cb-center-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--radial-center-size);
+  height: var(--radial-center-size);
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius-full);
+  background: #0E1016;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.4);
+}
+
+.cb-center-ring-glow {
+  position: absolute;
+  inset: 4px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid #818CF8;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.8), inset 0 0 8px rgba(99, 102, 241, 0.5);
+  animation: cb-ring-pulse 3s ease-in-out infinite alternate;
+}
+
+.cb-center-inner-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: radial-gradient(circle, #C7D2FE 0%, #6366F1 80%, #4338CA 100%);
+  box-shadow: 0 0 8px rgba(129, 140, 248, 0.9);
+}
+
+@keyframes cb-ring-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+/* Dynamic Tooltip */
+.cb-action-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--cb-hud-bg);
+  color: var(--cb-panel-text-primary);
+  border: 1px solid var(--cb-hud-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cb-action-tooltip.cb-visible {
+  opacity: 1;
+}
+
+.cb-tooltip-badge {
+  background: rgba(99, 102, 241, 0.25);
+  color: var(--accent-purple-light);
+  font-weight: 700;
+  font-size: 9.5px;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
