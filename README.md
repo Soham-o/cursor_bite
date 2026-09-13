@@ -1,121 +1,325 @@
 # Cursor Bite
 
-**Intelligence at your cursor.**
+> **Intelligence at your cursor.**
+>
+> A local-first, context-aware AI assistant for Windows that turns the information already on your screen into actions — without forcing you to leave your workflow.
 
-A privacy-first, local-first Windows AI assistant that appears around your mouse cursor when activated through a customizable global hotkey.
+<p align="center">
+  <strong>AI Assistant · Desktop Overlay · Privacy First · Local AI · Automation</strong>
+</p>
 
-## What is Cursor Bite?
+<p align="center">
+  <a href="https://github.com/Soham-o/cursor_bite/stargazers"><img src="https://img.shields.io/github/stars/Soham-o/cursor_bite?style=flat-square" alt="GitHub stars"></a>
+  <a href="https://github.com/Soham-o/cursor_bite/issues"><img src="https://img.shields.io/github/issues/Soham-o/cursor_bite?style=flat-square" alt="GitHub issues"></a>
+  <a href="https://github.com/Soham-o/cursor_bite/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Soham-o/cursor_bite?style=flat-square" alt="MIT License"></a>
+  <img src="https://img.shields.io/badge/Python-3.11%2B-blue?style=flat-square" alt="Python 3.11+"><br>
+  <img src="https://img.shields.io/badge/Platform-Windows-lightgrey?style=flat-square" alt="Windows">
+  <img src="https://img.shields.io/badge/AI-Local--First-success?style=flat-square" alt="Local first AI">
+</p>
 
-Cursor Bite is a contextual AI assistant for Windows that stays out of your way until you need it. Select some text anywhere — a browser, a PDF, an IDE, a chat window — press `Ctrl+Alt+B`, and a radial menu appears around your cursor. Pick an action and the answer opens next to where you were already looking.
+---
 
-No window to switch to, no tab to paste into, no account to sign into.
+## Why Cursor Bite?
 
-## Features
+Modern AI assistants usually make you **leave the context you are working in**: open a chat, copy text, paste it, ask a question, then return to the original application.
 
-- **Global Hotkey** — Activate with a customizable key combination (`Ctrl+Alt+B` by default) from any application, via native `RegisterHotKey`/`WM_HOTKEY`
-- **Cursor-Positioned Radial Menu** — Appears around your mouse, repositions near screen edges, multi-monitor and DPI aware; Escape or an outside click dismisses it
-- **Safe Text Capture** — Reads your selection by taking a snapshot of the clipboard, copying, and putting the original back, so using Cursor Bite never costs you what you had copied
-- **Universal Translation** — Fully offline neural translation via Argos Translate, into whichever language you configure
-- **Explain, Summarize, Rewrite, Ask AI** — Local AI through Ollama; the model runs on your machine and the text never leaves it
-- **OCR** — Drag a region of the screen and get its text, via Tesseract. Works on anything you can see: images, screenshots, video, applications that refuse to let you select text
-- **Web Search** — DuckDuckGo results in the result panel; the one action that sends anything off-device, and it says so before it does
-- **Result Panel** — Opens near the cursor, scrolls, copies to clipboard, and closes on Escape
-- **Privacy Gateway** — Pattern-based detection of emails, phone numbers, API keys, credit cards (Luhn-validated), tokens and private IPs, feeding a policy engine that decides local-vs-external per action, blocks what shouldn't leave, and asks before anything does
-- **System Tray** — Runs quietly in the tray, with real Settings, Privacy and Check Components windows
-- **Graceful degradation** — Every optional component is genuinely optional. Missing Tesseract, Ollama, Argos packs or an internet connection disables exactly one action and reports what to install; a fresh install with none of them present still starts and runs
+Cursor Bite takes the opposite approach.
 
-At startup, Cursor Bite performs zero network requests and initializes zero optional components. Nothing is imported, probed or connected to until an action needs it.
+**The interface comes to you.**
+
+Select text in a browser, PDF, IDE, document, or chat. Press `Ctrl+Alt+B`. A radial HUD appears around your cursor and lets you translate, summarize, explain, rewrite, search, capture screen text, or ask AI — right where you are working.
+
+The project is built around a simple engineering principle:
+
+> **Context should be an input to intelligence, not something the user has to manually transport between applications.**
+
+---
+
+## What it can do
+
+| Capability | What happens | Processing |
+|---|---|---|
+| **Translate** | Translate selected text into your configured language | Local / Argos Translate |
+| **Summarize** | Turn selected content into a concise summary | Local / Ollama |
+| **Explain** | Explain difficult text in context | Local / Ollama |
+| **Rewrite** | Improve or transform selected text | Local / Ollama |
+| **Ask AI** | Ask a free-form contextual question | Local / Ollama |
+| **OCR** | Select any screen region and extract text | Local / Tesseract |
+| **Web Search** | Search the web without opening a new workflow | External / DuckDuckGo |
+| **Privacy Gateway** | Detect sensitive content before external actions | Local |
+
+### Designed for the real desktop
+
+- Global Windows hotkey
+- Cursor-positioned radial interface
+- Multi-monitor and DPI-aware positioning
+- Clipboard snapshot + restoration
+- System tray operation
+- Lazy initialization of optional providers
+- Graceful degradation when optional components are unavailable
+- No telemetry
+- No keylogging
+- No persistent clipboard history
+- No background screen recording
+
+---
+
+## Privacy architecture
+
+Privacy is not a settings-page feature in Cursor Bite. It is part of the execution pipeline.
+
+```text
+                     USER CONTEXT
+                          │
+             selected text / screen region
+                          │
+                          ▼
+                ┌──────────────────┐
+                │ Context Provider │
+                └────────┬─────────┘
+                         │
+                         ▼
+                ┌──────────────────┐
+                │ Privacy Gateway  │
+                │                  │
+                │ detect sensitive │
+                │ data + policy    │
+                └────────┬─────────┘
+                         │
+              ┌──────────┴──────────┐
+              │                     │
+          LOCAL PATH            EXTERNAL PATH
+              │                     │
+       ┌──────┼──────┐              │
+       ▼      ▼      ▼              ▼
+     OCR   AI/LLM  Translate      Search
+  Tesseract Ollama  Argos       DuckDuckGo
+              │                     │
+              └──────────┬──────────┘
+                         ▼
+                  Result near cursor
+```
+
+Sensitive-data detection covers patterns such as emails, phone numbers, API keys, credit-card numbers, tokens, and private IP addresses. External actions can be blocked or require explicit consent according to the privacy policy.
+
+The application also preserves the user's clipboard across context capture paths and avoids putting user content into logs.
+
+---
 
 ## Architecture
 
-```
-User presses hotkey
-        │
-        ▼
-  Hotkey Listener (RegisterHotKey)
-        │
-        ▼
-  Cursor Detection (cursor position)
-        │
-        ▼
-  Radial Menu (PyQt6 overlay)
-        │
-        ▼
-  User selects action
-        │
-        ▼
-  Context Pipeline
-  ┌──────────────────┐
-  │ Context Provider │  ← selected text / clipboard / screen region / OCR
-  ├──────────────────┤
-  │ Privacy Gateway  │  ← detect sensitive data, decide local vs external
-  ├──────────────────┤     (may pause here for explicit consent)
-  │ Translation      │  ← Argos Translate (offline)
-  │ OCR              │  ← Tesseract (offline)
-  │ AI               │  ← Ollama (local)
-  │ Search           │  ← DuckDuckGo (free, best-effort)
-  ├──────────────────┤
-  │ Result Display   │  ← near cursor
-  └──────────────────┘
+Cursor Bite uses a **ports-and-adapters / hexagonal architecture** so the core application does not depend directly on a particular AI model, OCR engine, translation engine, or search provider.
+
+```text
+cursor_bite/
+│
+├── app/                  # Application orchestration and use cases
+├── domain/               # Core interfaces and domain contracts
+├── infrastructure/       # Provider implementations and OS integrations
+├── ui/                   # PyQt6 overlays, HUD, result and settings views
+├── config/               # Application configuration
+├── tests/                # Automated behavioral tests
+├── main.py               # Application entry point
+├── SETUP_GUIDE.md        # Component-by-component setup
+└── HOW_TO_USE.md         # User guide and keyboard reference
 ```
 
-Layers depend inwards only: `ui/` and `app/` know about `domain/` interfaces, `infrastructure/` implements them, and `domain/` knows about nothing else. Providers are resolved lazily and failure-safely, which is what makes the startup guarantee and the degradation guarantee above hold.
+### Dependency direction
 
-The pipeline runs in two phases — `prepare()` extracts and decides, `execute()` does the work — so the consent dialog has a seam to sit in: it runs on the UI thread between them, with the work either side of it on a worker thread. If you decline, nothing had run yet, so nothing was sent.
+```text
+        UI / Application
+               │
+               ▼
+            Domain
+               ▲
+               │
+       Infrastructure
+```
 
-## Privacy Philosophy
+The domain layer defines what the application needs. Infrastructure implements those capabilities. Providers are resolved lazily so an unavailable optional dependency does not prevent the application from starting.
 
-- **Local first** — Everything that can be processed locally is processed locally. Translation, OCR and AI are all local; search is the only action that leaves the machine
-- **No persistent storage** of captured text, screenshots, or clipboard history by default
-- **Sensitive data never leaves the device unintentionally** — detected patterns never block *local* processing, because the text is already on your machine and blocking it would only make the app useless for the documents you most want help with. They do block — or require explicit consent for — anything that would send them to an external service
-- **Your clipboard is yours** — it is snapshotted and restored on every path, including the ones where the capture failed
-- **No telemetry** — no analytics, no tracking, no hidden data collection
-- **No keylogging** — we never monitor your keystrokes
-- **No screen recording** — we only capture when you explicitly activate
-- **No user content in the logs** — logs carry action names, durations and error types, never the text you processed
+### Two-phase execution
 
-## Technology
+Actions use a `prepare()` → `execute()` model:
 
-- **Python 3.11+**
-- **PyQt6** — UI framework
-- **pywin32** — Windows API integration (hotkeys, clipboard)
-- **mss** + **Pillow** — Screen capture
-- **Tesseract** — OCR engine
-- **Argos Translate** — Offline neural machine translation
-- **Ollama** — Local AI runtime
-- **DuckDuckGo** — Web search, via its HTML endpoint (no API key)
+1. **Prepare** — capture context and determine the required policy.
+2. **Consent boundary** — if an external action needs permission, the user is asked before transmission.
+3. **Execute** — perform the selected operation.
+4. **Present** — display the result beside the cursor.
 
-## How to Use
+This separation makes privacy decisions explicit and testable.
 
-See **[HOW_TO_USE.md](HOW_TO_USE.md)** for the complete guide, keyboard shortcut reference (`1`–`8`), feature walkthroughs, and tray operations.
+---
 
-**Quick Summary:**
-1. Start the app: `python main.py` (or `.\venv\Scripts\python.exe main.py`)
-2. Select text anywhere on your screen
-3. Press `Ctrl+Alt+B` to open the radial HUD at your cursor
-4. Press keys `1`–`8` or click any sector:
-   - `[1]` Translate (Offline)
-   - `[2]` Summarize (AI)
-   - `[3]` Explain (AI)
-   - `[4]` Search Web (DuckDuckGo)
-   - `[5]` Settings
-   - `[6]` Capture OCR (Screen sniper)
-   - `[7]` Rewrite (AI)
-   - `[8]` Ask AI (Freeform or contextual)
+## Technology stack
 
-## Tests
+**Core**
+
+- Python 3.11+
+- PyQt6
+- pywin32
+
+**Local intelligence**
+
+- Ollama
+- Argos Translate
+- Tesseract OCR
+- mss
+- Pillow
+
+**External integration**
+
+- DuckDuckGo HTML search
+
+**Engineering**
+
+- pytest
+- Ports-and-adapters architecture
+- Lazy provider initialization
+- Failure-safe optional integrations
+
+---
+
+## Quick start
+
+### 1. Clone
+
+```bash
+git clone https://github.com/Soham-o/cursor_bite.git
+cd cursor_bite
+```
+
+### 2. Create a virtual environment
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+### 3. Install the core dependencies
+
+```powershell
+pip install -r requirements-core.txt
+```
+
+### 4. Run
+
+```powershell
+python main.py
+```
+
+The application can start without optional AI/OCR/translation components. Install only the integrations you want to use.
+
+For the complete Windows setup, see **[SETUP_GUIDE.md](SETUP_GUIDE.md)**.
+
+---
+
+## Keyboard controls
+
+| Key | Action |
+|---|---|
+| `Ctrl+Alt+B` | Open Cursor Bite |
+| `1` | Translate |
+| `2` | Summarize |
+| `3` | Explain |
+| `4` | Web Search |
+| `5` | Settings |
+| `6` | OCR / Screen Capture |
+| `7` | Rewrite |
+| `8` | Ask AI |
+| `Esc` | Close / cancel |
+
+See **[HOW_TO_USE.md](HOW_TO_USE.md)** for the full interaction guide.
+
+---
+
+## Testing
+
+The project includes a broad automated test suite covering core behavior such as:
+
+- Privacy detection and policy decisions
+- Pipeline actions
+- Clipboard save/restore behavior
+- Search rate limiting
+- Optional-component degradation
+- Two-phase consent behavior
+- Radial HUD keyboard and mouse navigation
+
+Run:
 
 ```bash
 python -m pytest tests/ -q
 ```
 
-238 tests covering the privacy detector and gateway, every pipeline action, the clipboard save/restore invariant, the search rate limiter, graceful degradation when packages are missing, the two-phase consent seam, and modern radial HUD keyboard & mouse navigation. They need no display, no network, no Ollama, no Tesseract and no Argos packs.
+The test suite is designed to avoid requiring a display, network access, Ollama, Tesseract, or Argos language packs for core behavioral coverage.
 
-## Setup
+---
 
-See [SETUP_GUIDE.md](SETUP_GUIDE.md) — it covers the minimum needed to launch, then each optional component separately, so you can install only the ones whose actions you want.
+## Design decisions
+
+### Local-first instead of cloud-first
+
+AI, OCR, and translation can operate locally. This reduces latency, improves privacy, and makes the core workflow usable without a cloud account.
+
+### Providers behind interfaces
+
+The application is not tightly coupled to one AI runtime or one provider. Provider implementations can be replaced without rewriting the domain layer.
+
+### Graceful degradation
+
+Optional dependencies should remove only the capability they provide — not break the application.
+
+### Explicit network boundary
+
+Web search is intentionally different from local actions. External transmission is treated as a visible policy boundary rather than an invisible implementation detail.
+
+### Clipboard safety as an invariant
+
+Cursor Bite temporarily uses the clipboard for universal text capture but restores the previous clipboard state after the operation, including failure paths.
+
+---
+
+## Roadmap
+
+- [ ] First-class downloadable Windows release
+- [ ] Signed installer
+- [ ] More local model/provider adapters
+- [ ] Additional OCR improvements
+- [ ] Richer contextual actions
+- [ ] Configurable action plugins
+- [ ] Performance profiling and startup optimization
+- [ ] Expanded accessibility support
+- [ ] More comprehensive integration tests
+
+The roadmap is intentionally focused on turning Cursor Bite from a strong prototype into a polished desktop product.
+
+---
+
+## Project status
+
+**Active development.**
+
+Cursor Bite is a serious engineering project and an evolving exploration of **context-aware desktop AI, local-first intelligence, privacy-aware automation, and human-computer interaction**.
+
+---
+
+## Contributing
+
+Contributions, bug reports, architecture discussions, and feature ideas are welcome.
+
+Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** before opening a pull request.
+
+Security-related reports should follow **[SECURITY.md](SECURITY.md)**.
+
+---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT — see **[LICENSE](LICENSE)**.
 
+---
+
+<p align="center">
+  <strong>Built by Soham Panda</strong><br>
+  <sub>AI engineering • intelligent software • privacy-first systems</sub>
+</p>
