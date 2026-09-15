@@ -2,29 +2,101 @@
 
 **Intelligence at your cursor.**
 
-A privacy-first, local-first Windows AI assistant that appears around your mouse cursor when activated through a customizable global hotkey.
+A privacy-first, local-first Windows assistant that appears around your
+mouse cursor when you press a hotkey — translate, explain, summarize,
+rewrite, ask AI, search, or pull text off the screen, without leaving
+whatever you're already looking at.
 
-## What is Cursor Bite?
+> **Screenshot / demo GIF:** not yet captured for this README. If you're
+> evaluating this project, the fastest way to see it is to run it —
+> [Quick Start](#quick-start) takes about two minutes on a machine that
+> already has Python.
 
-Cursor Bite is a contextual AI assistant for Windows that stays out of your way until you need it. Select some text anywhere — a browser, a PDF, an IDE, a chat window — press `Ctrl+Alt+B`, and a radial menu appears around your cursor. Pick an action and the answer opens next to where you were already looking.
+## Why
 
-No window to switch to, no tab to paste into, no account to sign into.
+Every one of these actions already exists somewhere — a translator site, a
+chat app, a search bar. What doesn't exist is one of them appearing exactly
+where your mouse already is, the instant you ask for it, without a tab
+switch, a paste, or an account. Select some text — a browser, a PDF, an IDE,
+a chat window — press `Ctrl+Alt+B`, and a menu appears at your cursor. Pick
+an action, and the answer opens right there.
+
+## Quick Start
+
+```powershell
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements-core.txt
+python main.py
+```
+
+Press `Ctrl+Alt+B` anywhere. That's the whole app — no account, no setup
+wizard, no window to find. See [SETUP_GUIDE.md](SETUP_GUIDE.md) for a full
+fresh-machine walkthrough and how to add the optional engines (translation,
+AI, OCR) behind each action.
 
 ## Features
 
-- **Global Hotkey** — Activate with a customizable key combination (`Ctrl+Alt+B` by default) from any application, via native `RegisterHotKey`/`WM_HOTKEY`
-- **Cursor-Positioned Radial Menu** — Appears around your mouse, repositions near screen edges, multi-monitor and DPI aware; Escape or an outside click dismisses it
-- **Safe Text Capture** — Reads your selection by taking a snapshot of the clipboard, copying, and putting the original back, so using Cursor Bite never costs you what you had copied
-- **Universal Translation** — Fully offline neural translation via Argos Translate, into whichever language you configure
-- **Explain, Summarize, Rewrite, Ask AI** — Local AI through Ollama; the model runs on your machine and the text never leaves it
-- **OCR** — Drag a region of the screen and get its text, via Tesseract. Works on anything you can see: images, screenshots, video, applications that refuse to let you select text
-- **Web Search** — DuckDuckGo results in the result panel; the one action that sends anything off-device, and it says so before it does
-- **Result Panel** — Opens near the cursor, scrolls, copies to clipboard, and closes on Escape
-- **Privacy Gateway** — Pattern-based detection of emails, phone numbers, API keys, credit cards (Luhn-validated), tokens and private IPs, feeding a policy engine that decides local-vs-external per action, blocks what shouldn't leave, and asks before anything does
-- **System Tray** — Runs quietly in the tray, with real Settings, Privacy and Check Components windows
-- **Graceful degradation** — Every optional component is genuinely optional. Missing Tesseract, Ollama, Argos packs or an internet connection disables exactly one action and reports what to install; a fresh install with none of them present still starts and runs
+| | | |
+|---|---|---|
+| 🌐 **Translate** | Offline, via Argos Translate | Working |
+| 💡 **Explain** | Local AI, via Ollama | Working |
+| 📑 **Summarize** | Local AI, via Ollama | Working |
+| ✍️ **Rewrite** | Local AI, via Ollama | Working |
+| 🤖 **Ask AI** | Local AI, contextual or freeform | Working |
+| 📷 **Capture Text (OCR)** | Local, via Tesseract | Working |
+| 🔍 **Search Web** | DuckDuckGo — the one action that leaves your device | Working |
+| 🔊 **Read Aloud** | — | Planned, not built |
 
-At startup, Cursor Bite performs zero network requests and initializes zero optional components. Nothing is imported, probed or connected to until an action needs it.
+Also working: a customizable global hotkey (native `RegisterHotKey` /
+`WM_HOTKEY`, no keyboard hooks), a cursor-anchored radial menu with full
+mouse and keyboard navigation, multi-monitor and DPI-aware positioning,
+clipboard-safe selection capture, a real Settings/Privacy/Check-Components
+tray UI, and graceful degradation — every optional engine above is
+independently optional, and a fresh install with none of them present still
+starts and runs, disabling exactly the one action each is missing.
+
+**At startup, Cursor Bite performs zero network requests and initializes
+zero optional components.** Nothing is imported, probed, or connected to
+until an action needs it.
+
+## Privacy Model
+
+```
+   Context
+      │
+      ▼
+ Privacy Gateway ── detects sensitive data (emails, keys, tokens,
+      │              credit cards, private IPs, credential pairs)
+      │
+      ├── LOCAL PROCESSING ──────────────────────► always allowed,
+      │                                              sensitive or not
+      │
+      └── requires EXTERNAL (Search Web only)
+              │
+              ├── clean text ──────────────────────► allowed
+              └── sensitive text ──► blocked, or a redacted-preview
+                                     consent prompt, per your settings
+```
+
+- **Local first.** Translation, AI, and OCR all run on your machine.
+  Search is the only action that sends anything off it, and the app tells
+  you before it does.
+- **Sensitive data never leaves the device unintentionally.** Detected
+  patterns never block *local* processing — the text is already on your
+  machine, and blocking it there would make the app useless for the
+  documents you most want help with. They *do* block, or require explicit
+  consent for, anything that would send them externally.
+- **Your clipboard is yours.** Snapshotted and restored on every path,
+  including the ones where capture failed or was cancelled.
+- **No telemetry, no keylogging, no continuous screen or clipboard
+  monitoring.** Capture only happens when you explicitly invoke it.
+- **No user content in the logs** — action names, durations, and error
+  *types*, never your text, prompts, translations, or search queries.
+
+The detector is regex-based and documented as a safety net, not a
+guarantee — see [SECURITY.md](SECURITY.md) for its threat model and known
+limitations.
 
 ## Architecture
 
@@ -32,90 +104,160 @@ At startup, Cursor Bite performs zero network requests and initializes zero opti
 User presses hotkey
         │
         ▼
-  Hotkey Listener (RegisterHotKey)
+  Hotkey Listener (RegisterHotKey / WM_HOTKEY, native Qt event filter)
         │
         ▼
-  Cursor Detection (cursor position)
+  Radial Menu opens immediately at the cursor
+        │  (selection capture happens off the UI thread, in parallel —
+        │   the menu never waits on it)
+        ▼
+  User selects an action
         │
         ▼
-  Radial Menu (PyQt6 overlay)
+  Pipeline.prepare()  →  Privacy Gateway  →  [optional consent dialog]  →  Pipeline.execute()
         │
         ▼
-  User selects action
-        │
-        ▼
-  Context Pipeline
-  ┌──────────────────┐
-  │ Context Provider │  ← selected text / clipboard / screen region / OCR
-  ├──────────────────┤
-  │ Privacy Gateway  │  ← detect sensitive data, decide local vs external
-  ├──────────────────┤     (may pause here for explicit consent)
-  │ Translation      │  ← Argos Translate (offline)
-  │ OCR              │  ← Tesseract (offline)
-  │ AI               │  ← Ollama (local)
-  │ Search           │  ← DuckDuckGo (free, best-effort)
-  ├──────────────────┤
-  │ Result Display   │  ← near cursor
-  └──────────────────┘
+  Result panel, near the cursor
 ```
 
-Layers depend inwards only: `ui/` and `app/` know about `domain/` interfaces, `infrastructure/` implements them, and `domain/` knows about nothing else. Providers are resolved lazily and failure-safely, which is what makes the startup guarantee and the degradation guarantee above hold.
+Ports-and-adapters layering: `ui/` and `app/` depend on `domain/`
+interfaces, `infrastructure/` implements them, and `domain/` depends on
+nothing else. Providers resolve lazily and fail safe, which is what makes
+the startup and degradation guarantees above hold — see
+`app/pipeline.py`'s `_load()` for the pattern.
 
-The pipeline runs in two phases — `prepare()` extracts and decides, `execute()` does the work — so the consent dialog has a seam to sit in: it runs on the UI thread between them, with the work either side of it on a worker thread. If you decline, nothing had run yet, so nothing was sent.
+The pipeline is split into `prepare()` (extract + privacy decision) and
+`execute()` (do the work) specifically so a consent dialog has a seam to
+sit in: it runs on the UI thread between the two phases, with the actual
+work on either side running on a worker thread. Decline, and nothing had
+run yet — nothing was sent.
 
-## Privacy Philosophy
-
-- **Local first** — Everything that can be processed locally is processed locally. Translation, OCR and AI are all local; search is the only action that leaves the machine
-- **No persistent storage** of captured text, screenshots, or clipboard history by default
-- **Sensitive data never leaves the device unintentionally** — detected patterns never block *local* processing, because the text is already on your machine and blocking it would only make the app useless for the documents you most want help with. They do block — or require explicit consent for — anything that would send them to an external service
-- **Your clipboard is yours** — it is snapshotted and restored on every path, including the ones where the capture failed
-- **No telemetry** — no analytics, no tracking, no hidden data collection
-- **No keylogging** — we never monitor your keystrokes
-- **No screen recording** — we only capture when you explicitly activate
-- **No user content in the logs** — logs carry action names, durations and error types, never the text you processed
+```
+cursor_bite/
+├── app/              orchestration: controller, pipeline, event bus
+├── domain/           interfaces + pure data, no infrastructure imports
+├── infrastructure/
+│   ├── ai/           Ollama
+│   ├── ocr/          Tesseract
+│   ├── os/           hotkey, cursor, clipboard, selection, screen capture
+│   ├── privacy/      sensitive-data detector, policy engine, gateway
+│   ├── search/       DuckDuckGo
+│   ├── storage/      cache (in-memory); an unused-by-default SQLite option
+│   └── translation/  Argos Translate
+├── ui/               PyQt6: radial menu, result panel, dialogs, tray
+├── config/           defaults + config.json loader
+├── utils/            logging, the run_async threading helper
+├── tests/            unit / integration / security
+└── design/           a browser-based UI/UX prototype — not the shipped app,
+                       see design/web-prototype/README.md
+```
 
 ## Technology
 
-- **Python 3.11+**
-- **PyQt6** — UI framework
-- **pywin32** — Windows API integration (hotkeys, clipboard)
-- **mss** + **Pillow** — Screen capture
-- **Tesseract** — OCR engine
-- **Argos Translate** — Offline neural machine translation
-- **Ollama** — Local AI runtime
-- **DuckDuckGo** — Web search, via its HTML endpoint (no API key)
+Python 3.11+ · PyQt6 · pywin32 · Argos Translate (offline) · Ollama (local)
+· Tesseract (offline) · DuckDuckGo (no API key). Every dependency is free —
+no paid API, no required account, no mandatory cloud service.
 
-## How to Use
+## Current Status
 
-See **[HOW_TO_USE.md](HOW_TO_USE.md)** for the complete guide, keyboard shortcut reference (`1`–`8`), feature walkthroughs, and tray operations.
+**Working today**, exercised by the test suite and by running the app:
+hotkey, radial menu, tray, privacy gateway, all seven actions listed above,
+Settings/Privacy/Check-Components windows, clipboard-safe capture,
+graceful degradation of every optional engine.
 
-**Quick Summary:**
-1. Start the app: `python main.py` (or `.\venv\Scripts\python.exe main.py`)
-2. Select text anywhere on your screen
-3. Press `Ctrl+Alt+B` to open the radial HUD at your cursor
-4. Press keys `1`–`8` or click any sector:
-   - `[1]` Translate (Offline)
-   - `[2]` Summarize (AI)
-   - `[3]` Explain (AI)
-   - `[4]` Search Web (DuckDuckGo)
-   - `[5]` Settings
-   - `[6]` Capture OCR (Screen sniper)
-   - `[7]` Rewrite (AI)
-   - `[8]` Ask AI (Freeform or contextual)
+**Experimental:** DuckDuckGo search depends on an HTML endpoint DuckDuckGo
+doesn't officially support for automation; it can return a bot-check page
+under load, which is reported plainly rather than silently retried forever.
+Language auto-detection for translation uses a three-tier fallback (Unicode
+script → statistical detection → a weak last-resort probe) that is
+deliberately conservative about guessing a language with no real evidence —
+see [CHANGELOG.md](CHANGELOG.md) for a bug this caught.
 
-## Tests
+**Planned, not built:** Read Aloud (TTS) — the interface for it
+(`TTSProvider` in `domain/interfaces.py`) exists, nothing implements it yet.
+An installer/MSI beyond the current PyInstaller build. A packaged
+`.exe` verified end-to-end (see [PACKAGING.md](PACKAGING.md) for exactly
+what has and hasn't been runtime-checked).
 
-```bash
+## Roadmap
+
+- Read Aloud via a local TTS engine.
+- An MSI/installer instead of a copy-the-folder EXE build.
+- Revisit the radial menu against a compact command-bar alternative with
+  real usage data — the interaction model isn't assumed to be final.
+
+## Limitations
+
+- Windows only, by design.
+- Selection capture uses a simulated Ctrl+C plus a clipboard snapshot —
+  there is no universal cross-application "get selection" API on Windows
+  without deeper accessibility integration. This works in the overwhelming
+  majority of apps; a handful of unusual ones (custom-rendered canvases with
+  no text layer, some elevated/protected windows) won't produce a selection
+  to copy. The app tells you plainly when nothing was captured rather than
+  guessing.
+- Web search quality is bounded by an unofficial HTML endpoint — see
+  Current Status above.
+- The sensitive-data detector is pattern-based, not exhaustive — see
+  [SECURITY.md](SECURITY.md).
+
+## Development
+
+```powershell
+pip install -r requirements.txt
+pip install pytest ruff
+python -m pytest tests/ -q
+ruff check .
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the architectural conventions
+(lazy/fail-safe providers, no UI-thread blocking, no user content in logs)
+this project holds itself to.
+
+## Testing
+
+```powershell
 python -m pytest tests/ -q
 ```
 
-238 tests covering the privacy detector and gateway, every pipeline action, the clipboard save/restore invariant, the search rate limiter, graceful degradation when packages are missing, the two-phase consent seam, and modern radial HUD keyboard & mouse navigation. They need no display, no network, no Ollama, no Tesseract and no Argos packs.
+306 tests across privacy detection and policy, every pipeline action, the
+clipboard save/restore invariant, selection-capture concurrency, the
+hotkey string parser, multi-monitor cursor geometry, search rate limiting
+and fallback tiers, graceful degradation when packages are missing, the
+two-phase consent seam, and radial-menu keyboard/mouse navigation. Runs
+headless — no display, network, Ollama, Tesseract, or Argos packs required
+(one test additionally exercises a real installed Argos language pack when
+one happens to be present, and degrades to its "not installed" branch
+otherwise).
 
-## Setup
+## Packaging
 
-See [SETUP_GUIDE.md](SETUP_GUIDE.md) — it covers the minimum needed to launch, then each optional component separately, so you can install only the ones whose actions you want.
+```powershell
+pip install pyinstaller
+pyinstaller cursor_bite.spec
+```
+
+See [PACKAGING.md](PACKAGING.md) for what's bundled, what still needs to be
+installed separately on the target machine, and what has and hasn't been
+runtime-verified about the resulting build.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Please also read
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the threat model, how to report a
+vulnerability, and the detector's known limitations.
+
+## Important product principle
+
+This project stays deliberately small. Before adding anything, ask whether
+it improves *context*, *intelligence*, *speed*, *privacy*, or *reliability*.
+If not, it probably doesn't belong — a focused project is worth more than a
+large one.
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
-
+MIT — see [LICENSE](LICENSE).

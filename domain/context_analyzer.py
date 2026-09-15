@@ -190,7 +190,7 @@ class ContextAnalyzer:
         code_matches = sum(
             1 for p in _CODE_PATTERNS if re.search(p, clean, re.MULTILINE)
         )
-        has_indentation = any(l.startswith(("    ", "\t")) for l in lines[1:])
+        has_indentation = any(line.startswith(("    ", "\t")) for line in lines[1:])
         has_code_syntax = code_matches >= 1 or (has_indentation and len(lines) >= 3)
 
         if has_code_syntax:

@@ -162,25 +162,71 @@ class ArgosTranslationProvider(BaseTranslationProvider):
         except Exception:
             pass
 
-        # Tier 3: Installed Argos language probe fallback
+        # Tier 3: Installed Argos language probe fallback.
+        #
+        # BUG FIXED: this used to iterate every installed language
+        # *including English itself* and treat "the model produced more
+        # than 5 characters of output" as proof of a source-language
+        # match. Two problems: (a) an NMT model doesn't refuse
+        # out-of-domain input, so almost any installed X->en model
+        # produces *some* plausible-looking output for *any* input,
+        # making ">5 chars" no signal at all; (b) English was never
+        # excluded, so if `en` happened to have a translation object
+        # pointing at itself (some argostranslate builds resolve a
+        # same-language pair to an identity translation), that identity
+        # "translation" of e.g. Spanish text back to itself would satisfy
+        # the length check first and confidently report English. That
+        # was the confirmed cause of Spanish text being misdetected as
+        # English when the langdetect package (Tier 2) was unavailable.
+        #
+        # This is inherently a weak last resort — it can only ever
+        # confirm "some installed model round-trips this text", not
+        # identify the language — so it is scored low (0.55) and must
+        # never be treated as equivalent to a real detector's confidence.
+        #
+        # PERFORMANCE FIX: each candidate requires argostranslate to load
+        # a real NMT model from disk on first use and run actual
+        # inference — measured at several seconds *per language* the
+        # first time. The original loop tried every installed language,
+        # which reproduced as a genuine ~14-20 second stall (confirmed
+        # live and by direct timing) on a translate action that was
+        # ultimately only guessing. Capped to a handful of candidates so
+        # the worst case (langdetect unavailable, text this ambiguous)
+        # is bounded rather than scaling with how many language packs
+        # happen to be installed.
+        _MAX_TIER3_CANDIDATES = 2
         if self._ensure_ready():
             try:
                 import argostranslate.translate
                 languages = argostranslate.translate.get_installed_languages()
-                en_obj = next((l for l in languages if l.code == "en"), None)
+                en_obj = next((lang_obj for lang_obj in languages if lang_obj.code == "en"), None)
                 if en_obj:
+                    tried = 0
                     for lang in languages:
+                        if lang.code == "en":
+                            # Translating English "through itself" proves
+                            # nothing about the source language and must
+                            # never be used as a detection signal.
+                            continue
+                        if tried >= _MAX_TIER3_CANDIDATES:
+                            break
+                        tried += 1
                         try:
                             tr = lang.get_translation(en_obj)
                             if tr:
                                 res = tr.translate(sample[:200])
                                 if res and len(res) > 5:
-                                    return lang.code, 0.70
+                                    return lang.code, 0.55
                         except Exception:
                             continue
             except Exception:
                 pass
 
+        # No script match, no statistical detector available, and no
+        # installed-model probe succeeded — this is genuinely ambiguous
+        # Latin-script text. Reporting "en" here would be a confident
+        # guess with zero evidence behind it, so report unknown instead
+        # and let the caller ask the user to pick a source language.
         return None, 0.0
 
     def detect_language(self, text: str) -> Optional[str]:
@@ -272,8 +318,8 @@ class ArgosTranslationProvider(BaseTranslationProvider):
                 )
 
             # Step 3: Check Argos installed models
-            source_obj = next((l for l in languages if l.code == from_lang), None)
-            target_obj = next((l for l in languages if l.code == target_lang), None)
+            source_obj = next((lang_obj for lang_obj in languages if lang_obj.code == from_lang), None)
+            target_obj = next((lang_obj for lang_obj in languages if lang_obj.code == target_lang), None)
 
             if source_obj is None:
                 return TranslationResult(

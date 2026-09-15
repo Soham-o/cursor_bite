@@ -84,8 +84,9 @@ build/
 # Node dependencies
 node_modules/
 
-# Testing
+# Testing / linting
 .pytest_cache/
+.ruff_cache/
 .coverage
 htmlcov/
 .tox/

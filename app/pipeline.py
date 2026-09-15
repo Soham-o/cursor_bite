@@ -961,7 +961,7 @@ class Pipeline:
             ),
             "ocr": probe(
                 self.ocr_provider,
-                "Install Tesseract OCR (see SETUP_GUIDE.md step 7).",
+                "Install Tesseract OCR (see SETUP_GUIDE.md).",
             ),
             "ai": probe(
                 self.ai_provider,

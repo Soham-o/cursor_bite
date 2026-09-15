@@ -1,0 +1,22 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["venv", ".venv", "design", "build", "dist"]
+
+[tool.ruff.lint]
+# Ruff's own documented defaults (pyflakes + the pycodestyle rules that
+# don't conflict with a formatter). Deliberately narrow: this project
+# predates ruff, and turning on the broader opinionated rule families
+# (pyupgrade, bandit, isort, ...) all at once would produce hundreds of
+# stylistic findings unrelated to correctness rather than a usable CI
+# gate. Widen this deliberately, rule family by rule family, rather than
+# all at once.
+select = ["E4", "E7", "E9", "F"]
+ignore = [
+    "F401",  # unused imports: many provider modules import a type only
+             # for a docstring/annotation; not worth the noise to chase
+             # down repo-wide in this pass.
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["F401", "F841"]

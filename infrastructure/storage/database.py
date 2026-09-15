@@ -2,11 +2,13 @@
 # ============================================================
 # Lightweight SQLite storage for application metadata.
 #
-# IMPORTANT: For Milestone 1, this module is NOT initialized or used.
-# The module exists for future milestones but creates no database
-# on import and performs no operations unless explicitly called.
-#
-# Database initialization is deferred to when it's actually needed.
+# IMPORTANT: Nothing in the running application constructs a Database
+# instance today — every actual setting lives in config.json via
+# config/settings.py, and no feature currently needs persistent
+# key/value storage. This module is kept as a ready-made option for a
+# future feature that does (e.g. caching OCR results across restarts),
+# not as a placeholder standing in for missing functionality. It
+# creates no database file and performs no operations on import.
 
 import logging
 import os
@@ -114,6 +116,7 @@ class Database:
             conn.close()
 
 
-# ── Note: No module-level instance for Milestone 1 ─────────────────
-# The database is NOT created or used in Milestone 1.
-# Future milestones can create a Database() instance when needed.
+# ── Note: no module-level instance ──────────────────────────────────
+# Unlike the other infrastructure singletons in this codebase, there is
+# deliberately no `database = Database()` here — nothing needs one yet.
+# A future feature that does can construct one; see the module docstring.

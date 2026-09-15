@@ -87,6 +87,8 @@ class Controller(QObject):
 
         self._busy = False
         self._generation = 0
+        self._capture_generation = 0
+        self._capture_consumed = False
         self._capture_title = ""
         self._target_hwnd: Optional[int] = None
         self._pre_captured_text: Optional[str] = None
@@ -171,23 +173,26 @@ class Controller(QObject):
 
         self.dismiss_panel()
 
-        # Remember which window had focus before showing our menu
+        # Remember which window had focus before showing our menu. This is
+        # a single, effectively instant syscall — nothing here may block.
         try:
             import win32gui
             self._target_hwnd = win32gui.GetForegroundWindow()
         except Exception:
             self._target_hwnd = None
 
-        # Pre-capture selection while target app is definitely in foreground
-        self._snapshot_selection()
-
+        self._pre_captured_text = None
         self._open_menu()
 
     # ── Menu ────────────────────────────────────────────────────
 
     def _open_menu(self) -> None:
-        """Show the radial menu at the cursor."""
-        from domain.context_analyzer import ContextAnalyzer
+        """Show the radial menu at the cursor immediately.
+
+        Selection capture (simulated Ctrl+C + a clipboard poll that can
+        take up to ~500ms) happens afterwards, off the UI thread — the
+        menu must never wait on it to appear. See _start_selection_capture.
+        """
         from infrastructure.os.cursor import get_cursor_position
         from ui.activation_toast import ActivationToast
 
@@ -201,33 +206,74 @@ class Controller(QObject):
             cursor_pos = None
 
         menu = self._get_menu()
-
-        # Context-aware action ranking
-        has_sel = bool(self._pre_captured_text)
-        analysis = None
-        if has_sel and self._pre_captured_text:
-            analysis = ContextAnalyzer.analyze(self._pre_captured_text)
-        recommended = ContextAnalyzer.rank_actions(analysis, has_selection=has_sel)
-        menu.set_recommended_actions(recommended)
-
-        menu.open_at(cursor_pos, has_selection=has_sel)
+        menu.set_recommended_actions([])
+        menu.open_at(cursor_pos, has_selection=False)
 
         event_bus.emit(AppEvent.RADIAL_MENU_OPENED)
         self.menu_opened.emit()
 
+        self._capture_generation += 1
+        self._capture_consumed = False
+        self._start_selection_capture(self._capture_generation, self._target_hwnd)
 
-    def _snapshot_selection(self) -> None:
-        """Immediately snapshot current selection while target app is foreground."""
-        try:
-            res = self.pipeline.text_provider.extract_text(target_hwnd=self._target_hwnd)
-            if res.success and res.data and res.data.strip():
-                self._pre_captured_text = res.data.strip()
-                logger.debug(f"Selection pre-captured ({len(self._pre_captured_text)} chars).")
-            else:
-                self._pre_captured_text = None
-        except Exception as e:
-            logger.debug(f"Selection pre-capture skipped: {e}")
-            self._pre_captured_text = None
+    def _start_selection_capture(self, capture_gen: int, target_hwnd: Optional[int]) -> None:
+        """Capture the current selection off the UI thread.
+
+        Runs after the menu is already on screen. `capture_gen` lets a
+        result from a hotkey press that has since been superseded (a
+        second press, a cancel) be dropped instead of overwriting a
+        newer run's state.
+        """
+        run_async(
+            lambda: self.pipeline.text_provider.extract_text(target_hwnd=target_hwnd),
+            on_result=lambda res: self._on_selection_captured(capture_gen, res),
+            on_error=lambda err: self._on_selection_capture_failed(capture_gen, err),
+        )
+
+    def _on_selection_captured(self, capture_gen: int, result: object) -> None:
+        """Store the captured selection and refresh the menu if it's still open.
+
+        Dropped if superseded by a newer hotkey press, or if the user
+        already picked an action before this resolved — `_begin()` has
+        its own extraction path for that case, and writing here afterwards
+        would leave a stale `_pre_captured_text` sitting around for
+        whatever session starts next.
+        """
+        if capture_gen != self._capture_generation or self._capture_consumed:
+            logger.debug("Dropping selection capture: superseded or already consumed.")
+            return
+
+        text = None
+        if isinstance(result, ProcessingResult) and result.success and result.data and result.data.strip():
+            text = result.data.strip()
+            logger.debug(f"Selection pre-captured ({len(text)} chars).")
+
+        self._pre_captured_text = text
+        self._refresh_menu_context(text)
+
+    def _on_selection_capture_failed(self, capture_gen: int, error: Exception) -> None:
+        if capture_gen != self._capture_generation or self._capture_consumed:
+            return
+        logger.debug(f"Selection pre-capture skipped: {type(error).__name__}")
+        self._pre_captured_text = None
+        self._refresh_menu_context(None)
+
+    def _refresh_menu_context(self, text: Optional[str]) -> None:
+        """Update the open menu's selection dot and recommendations.
+
+        No-ops once the menu has closed — the user either already picked
+        an action (which consumed `_pre_captured_text` synchronously) or
+        dismissed the menu, and there is nothing left on screen to refresh.
+        """
+        if self._menu is None or not self._menu.is_open:
+            return
+
+        from domain.context_analyzer import ContextAnalyzer
+
+        has_sel = bool(text)
+        analysis = ContextAnalyzer.analyze(text) if has_sel else None
+        recommended = ContextAnalyzer.rank_actions(analysis, has_selection=has_sel)
+        self._menu.update_context(has_sel, recommended)
 
     def close_menu(self) -> None:
         """Close the radial menu if it is open."""
@@ -264,6 +310,7 @@ class Controller(QObject):
         title = _ACTION_TITLES.get(action, action.value.replace("_", " ").title())
 
         self._set_busy(True)
+        self._capture_consumed = True
 
         if action == ActionKind.CAPTURE_TEXT:
             self._start_capture(generation, title)
@@ -478,29 +525,58 @@ class Controller(QObject):
         """Check OCR is usable, then let the user drag a region.
 
         The availability probe runs off-thread and *before* the overlay
-        so a user without Tesseract is told so immediately, rather than
-        after carefully selecting a region for nothing.
+        so a user missing Tesseract OR the screen-capture package is told
+        immediately, rather than after carefully selecting a region for
+        nothing. Both are checked together: Tesseract can be installed
+        while the 'mss' Python package is not (or vice versa), and either
+        one missing means capture can't complete end-to-end.
         """
         self._capture_title = title
 
         run_async(
-            lambda: self.pipeline.ocr_provider.is_available(),
+            self._probe_capture_readiness,
             on_result=lambda ok: self._on_ocr_probed(generation, title, ok),
             on_error=lambda error: self._on_worker_error(generation, title, error),
         )
 
+    def _probe_capture_readiness(self) -> bool:
+        """Whether Capture Text can run end-to-end right now."""
+        if not self._screen_capture_available():
+            return False
+        return self.pipeline.ocr_provider.is_available()
+
+    @staticmethod
+    def _screen_capture_available() -> bool:
+        """Whether the screen-capture dependency ('mss') can be imported.
+
+        Checked separately from OCR: mss is what actually grabs the pixels
+        (infrastructure/os/screen_capture.py), and Tesseract being present
+        says nothing about whether that package is installed.
+        """
+        try:
+            import mss  # noqa: F401
+            return True
+        except Exception:
+            return False
+
     def _on_ocr_probed(self, generation: int, title: str, available: object) -> None:
-        """Open the region selector once OCR is confirmed available."""
+        """Open the region selector once capture is confirmed available."""
         if not self._is_current(generation):
             return
 
         if not available:
-            self._show_error(
-                title,
-                "OCR is not available. Install Tesseract OCR and make sure "
-                "tesseract.exe is on your PATH, then use Check Components "
-                "from the tray menu to re-test.",
-            )
+            if not self._screen_capture_available():
+                hint = (
+                    "Screen capture needs the 'mss' package. "
+                    "Run: pip install -r requirements.txt"
+                )
+            else:
+                hint = (
+                    "OCR is not available. Install Tesseract OCR and make sure "
+                    "tesseract.exe is on your PATH, then use Check Components "
+                    "from the tray menu to re-test."
+                )
+            self._show_error(title, hint)
             return
 
         self._get_selector().start()
@@ -529,7 +605,22 @@ class Controller(QObject):
         The screenshot exists only as bytes in memory — nothing is
         written to disk on this path.
         """
-        from infrastructure.os.screen_capture import screen_capture
+        try:
+            from infrastructure.os.screen_capture import screen_capture
+        except Exception as e:
+            # Belt-and-braces: _probe_capture_readiness() already checks
+            # this before the overlay opens, but a package removed mid-
+            # session (or a DLL that fails to load) must still degrade to
+            # an actionable message instead of an unhandled worker error.
+            logger.warning(f"Screen capture unavailable: {type(e).__name__}")
+            missing = getattr(e, "name", None) or "mss"
+            return PreparedRequest(
+                action=ActionKind.CAPTURE_TEXT,
+                error=(
+                    f"Screen capture needs the '{missing}' Python package. "
+                    f"Run: pip install -r requirements.txt"
+                ),
+            )
 
         image_bytes = screen_capture.capture_absolute_region_to_bytes(
             region.left(), region.top(), region.width(), region.height()

@@ -38,7 +38,6 @@ from PyQt6.QtWidgets import (
 from ui.overlay_window import OverlayWindow
 from ui.theme import (
     CursorBiteColors,
-    ACTION_THEME,
     get_font,
     get_heading_font,
     get_mono_font,
@@ -301,14 +300,15 @@ class ResultWindow(OverlayWindow):
         self._badge = QLabel("• AI")
         self._badge.setFont(get_font(10, bold=True))
         self._badge.setStyleSheet(
-            "QLabel { background: #161928; color: #818CF8; border-radius: 4px; padding: 2px 7px; }"
+            f"QLabel {{ background: {CursorBiteColors.BACKGROUND_SECONDARY.name()}; "
+            f"color: {CursorBiteColors.ACCENT_SECONDARY.name()}; border-radius: 4px; padding: 2px 7px; }}"
         )
         header.addWidget(self._badge)
 
         # Action Title
         self._title = QLabel("Result")
         self._title.setFont(get_heading_font(12, bold=True))
-        self._title.setStyleSheet("QLabel { color: #FFFFFF; font-weight: 700; }")
+        self._title.setStyleSheet(f"QLabel {{ color: {CursorBiteColors.TEXT_PRIMARY.name()}; font-weight: 700; }}")
         header.addWidget(self._title)
 
         header.addStretch(1)
@@ -316,7 +316,7 @@ class ResultWindow(OverlayWindow):
         # Live Status Chip
         self._status = QLabel("Working...")
         self._status.setFont(get_font(10))
-        self._status.setStyleSheet("QLabel { color: #94A3B8; }")
+        self._status.setStyleSheet(f"QLabel {{ color: {CursorBiteColors.TEXT_SECONDARY.name()}; }}")
         header.addWidget(self._status)
 
         # Pin Button
@@ -367,7 +367,7 @@ class ResultWindow(OverlayWindow):
 
         self._meta_chip = QLabel("")
         self._meta_chip.setFont(get_font(10))
-        self._meta_chip.setStyleSheet("QLabel { color: #64748B; }")
+        self._meta_chip.setStyleSheet(f"QLabel {{ color: {CursorBiteColors.TEXT_TERTIARY.name()}; }}")
         footer.addWidget(self._meta_chip)
 
         footer.addStretch(1)
@@ -375,7 +375,7 @@ class ResultWindow(OverlayWindow):
         # Hint pill
         self._hint = QLabel("Esc to close")
         self._hint.setFont(get_mono_font(9))
-        self._hint.setStyleSheet("QLabel { color: #475569; }")
+        self._hint.setStyleSheet(f"QLabel {{ color: {CursorBiteColors.TEXT_MUTED.name()}; }}")
         footer.addWidget(self._hint)
 
         # Copy button

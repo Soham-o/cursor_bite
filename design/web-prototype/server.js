@@ -1,10 +1,19 @@
 /**
- * Cursor Bite - Local Development & Real-Time API Server
+ * Cursor Bite - UI/UX design-prototype server (NOT part of the shipped app)
+ *
+ * This is a browser-based mockup of the radial menu / result panel used
+ * to explore the interaction design before it was built as the real
+ * Windows PyQt6 application in the repository root. It has no
+ * connection to that app's runtime — see design/web-prototype/README.md.
+ *
  * Provides:
  * 1. Zero-dependency static file server for web/
  * 2. Real-time Ollama streaming proxy (/api/generate)
  * 3. Ollama health check & model discovery (/api/ollama/status)
  * 4. Real-time DuckDuckGo web search endpoint (/api/search)
+ *
+ * Intended for localhost-only, developer-run use. Do not expose this
+ * port to a network — it proxies to local Ollama with no auth.
  */
 
 const http = require('http');
@@ -31,8 +40,14 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  // CORS Headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS: this proxies to local Ollama with no authentication, so the
+  // origin allowlist is deliberately narrow rather than '*' — a wildcard
+  // here would let any website the developer has open in a browser tab
+  // talk to it too.
+  const origin = req.headers.origin;
+  if (origin && /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -203,10 +218,18 @@ const server = http.createServer((req, res) => {
   }
 
   // 4. Static File Server
-  let filePath = path.join(WEB_DIR, pathname === '/' ? 'index.html' : pathname);
+  // Security: resolve to a real absolute path and require it to sit
+  // strictly inside WEB_DIR (with a path-separator boundary, not just a
+  // string prefix — "web-evil" would otherwise pass a bare startsWith
+  // check against "web"). path.normalize alone is not enough either,
+  // since it doesn't stop a "../" sequence from escaping WEB_DIR before
+  // the join, only after — resolving the joined path is what closes it.
+  const requestedPath = decodeURIComponent(pathname === '/' ? '/index.html' : pathname);
+  const filePath = path.resolve(WEB_DIR, '.' + requestedPath);
+  const withinWebDir =
+    filePath === WEB_DIR || filePath.startsWith(WEB_DIR + path.sep);
 
-  // Security: prevent directory traversal
-  if (!filePath.startsWith(WEB_DIR)) {
+  if (!withinWebDir) {
     res.writeHead(403);
     res.end('Forbidden');
     return;

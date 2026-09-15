@@ -31,8 +31,6 @@ from PyQt6.QtGui import (
     QPainterPath,
     QPaintEvent,
     QMouseEvent,
-    QFont,
-    QFontMetrics,
     QCursor,
     QKeyEvent,
     QPen,
@@ -43,24 +41,30 @@ from PyQt6.QtWidgets import QWidget, QApplication
 
 from config.settings import settings
 from domain.models import ActionKind
-from ui.theme import CursorBiteColors, ACTION_THEME, get_font, get_heading_font, get_mono_font
+from ui.icons import draw_icon
+from ui.theme import CursorBiteColors, get_font, get_heading_font, get_mono_font
 from utils.logger import get_logger
 
 logger = get_logger("ui.radial_menu")
 
 
 # ── Action Definitions (Clockwise from 12 o'clock) ─────────────────
+#
+# Icon keys map to ui.icons.draw_icon — simple single-weight line glyphs
+# drawn with QPainter, not emoji. One consistent visual language across
+# every sector instead of whatever glyphs a system emoji font happens to
+# render (which also vary in color and style across Windows versions).
 
 MENU_ACTIONS = [
-    # (ActionKind, Label, Icon, KeyNumber, ShortDesc)
-    (ActionKind.TRANSLATE,    "Translate",    "🌐", "1", "Offline Neural Translation"),
-    (ActionKind.SUMMARIZE,    "Summarize",    "📑", "2", "Concise Summary with AI"),
-    (ActionKind.EXPLAIN,      "Explain",      "💡", "3", "2-4 Sentence Concept Breakdown"),
-    (ActionKind.SEARCH_WEB,   "Search Web",   "🔍", "4", "DuckDuckGo Web Search"),
-    (ActionKind.SETTINGS,     "Settings",     "⚙️", "5", "Preferences & Models"),
-    (ActionKind.CAPTURE_TEXT, "Capture OCR",  "📷", "6", "Screen Region Sniper"),
-    (ActionKind.REWRITE,      "Rewrite",      "✍️", "7", "Precision Polish (Meaning Preserved)"),
-    (ActionKind.ASK_AI,       "Ask AI",       "🤖", "8", "Contextual or Freeform AI"),
+    # (ActionKind, Label, IconKey, KeyNumber, ShortDesc)
+    (ActionKind.TRANSLATE,    "Translate",    "globe",   "1", "Offline Neural Translation"),
+    (ActionKind.SUMMARIZE,    "Summarize",    "summary", "2", "Concise Summary with AI"),
+    (ActionKind.EXPLAIN,      "Explain",      "bulb",    "3", "2-4 Sentence Concept Breakdown"),
+    (ActionKind.SEARCH_WEB,   "Search Web",   "search",  "4", "DuckDuckGo Web Search"),
+    (ActionKind.SETTINGS,     "Settings",     "sliders", "5", "Preferences & Models"),
+    (ActionKind.CAPTURE_TEXT, "Capture OCR",  "frame",   "6", "Screen Region Sniper"),
+    (ActionKind.REWRITE,      "Rewrite",      "pencil",  "7", "Precision Polish (Meaning Preserved)"),
+    (ActionKind.ASK_AI,       "Ask AI",       "chat",    "8", "Contextual or Freeform AI"),
 ]
 
 INDEX_TO_ACTION = [item[0] for item in MENU_ACTIONS]
@@ -160,6 +164,18 @@ class RadialMenu(QWidget):
     def set_recommended_actions(self, actions: list[ActionKind]) -> None:
         """Set adaptive recommended actions based on context intelligence."""
         self._recommended_actions = set(actions)
+        self.update()
+
+    def update_context(self, has_selection: bool, recommended_actions: list[ActionKind]) -> None:
+        """Refresh selection state and recommendations on an already-open menu.
+
+        The menu opens before selection capture finishes (capture runs off
+        the UI thread), so this is how the "ready" dot and the recommended
+        sectors catch up once the real answer is in — without touching the
+        open animation or anything currently hovered/focused.
+        """
+        self._has_selection = has_selection
+        self._recommended_actions = set(recommended_actions)
         self.update()
 
     def close_menu(self) -> None:
@@ -277,12 +293,11 @@ class RadialMenu(QWidget):
         cp = self._center_point()
         cx, cy = cp.x(), cp.y()
         n_sectors = len(MENU_ACTIONS)
-        sector_span = 360.0 / n_sectors
 
         # ── 1. Subtle Backdrop Ambient Ring ─────────────────────
         ambient_rect = QRectF(cx - _OUTER_R - 2, cy - _OUTER_R - 2, (_OUTER_R + 2) * 2, (_OUTER_R + 2) * 2)
         ambient_grad = QRadialGradient(cx, cy, _OUTER_R + 4)
-        ambient_grad.setColorAt(0.0, QColor(15, 18, 28, 250))
+        ambient_grad.setColorAt(0.0, CursorBiteColors.MENU_BACKDROP)
         ambient_grad.setColorAt(0.85, QColor(11, 13, 20, 245))
         ambient_grad.setColorAt(1.0, QColor(7, 8, 14, 235))
         p.setPen(Qt.PenStyle.NoPen)
@@ -299,13 +314,13 @@ class RadialMenu(QWidget):
             inner_r = _INNER_R
             path = self._sector_path(i, outer_r, inner_r)
 
-            # Sector Fill: Restrained cohesive violet on hover, subtle dark on idle
+            # Sector fill: restrained accent wash on hover, quiet glass on idle
             if is_hovered:
-                p.setBrush(QBrush(QColor(99, 102, 241, 80)))  # Soft purple hover
-                p.setPen(QPen(CursorBiteColors.ACCENT_SECONDARY, 1.5))
+                p.setBrush(QBrush(CursorBiteColors.MENU_SECTOR_HOVER))
+                p.setPen(QPen(CursorBiteColors.MENU_BORDER_HOVER, 1.5))
             else:
-                p.setBrush(QBrush(QColor(22, 26, 38, 120)))
-                p.setPen(QPen(QColor(255, 255, 255, 14), 1.0))
+                p.setBrush(QBrush(CursorBiteColors.MENU_SECTOR_IDLE))
+                p.setPen(QPen(CursorBiteColors.MENU_BORDER_IDLE, 1.0))
 
             p.drawPath(path)
 
@@ -313,7 +328,7 @@ class RadialMenu(QWidget):
             self._draw_sector_content(p, i, kind, label, icon, key_num, is_hovered, is_recommended)
 
         # ── 3. Subtle Outer Ring ────────────────────────────────
-        outer_pen = QPen(QColor(255, 255, 255, 24), 1.0)
+        outer_pen = QPen(CursorBiteColors.BORDER_SUBTLE, 1.0)
         p.setPen(outer_pen)
         p.setBrush(Qt.BrushStyle.NoBrush)
         p.drawEllipse(QRectF(cx - _OUTER_R, cy - _OUTER_R, _OUTER_R * 2, _OUTER_R * 2))
@@ -338,13 +353,9 @@ class RadialMenu(QWidget):
         icon_pos = self._point_on_radius(index, _ICON_R)
         key_pos  = self._point_on_radius(index, _KEY_R)
 
-        # 1. Action Icon (Emoji / Symbol)
-        icon_font = QFont("Segoe UI Emoji", 13 if is_hovered else 12)
-        icon_font.setStyleStrategy(QFont.StyleStrategy.PreferAntialias)
-        p.setFont(icon_font)
-        p.setPen(QPen(QColor("#FFFFFF") if is_hovered else QColor("#CBD5E1")))
-        icon_rect = QRectF(icon_pos.x() - 12, icon_pos.y() - 12, 24, 24)
-        p.drawText(icon_rect, Qt.AlignmentFlag.AlignCenter, icon)
+        # 1. Action icon — a simple line glyph, not an emoji (see ui/icons.py)
+        icon_color = CursorBiteColors.TEXT_PRIMARY if is_hovered else CursorBiteColors.TEXT_SECONDARY
+        draw_icon(p, icon, icon_pos, 17.0 if is_hovered else 15.0, icon_color)
 
         # 2. Micro Key Badge (e.g. "1")
         key_font = get_mono_font(size=7)
@@ -352,7 +363,7 @@ class RadialMenu(QWidget):
         if is_hovered:
             p.setPen(QPen(CursorBiteColors.TEXT_ACCENT))
         else:
-            p.setPen(QPen(QColor(148, 163, 184, 150)))
+            p.setPen(QPen(CursorBiteColors.TEXT_TERTIARY))
 
         key_rect = QRectF(key_pos.x() - 8, key_pos.y() - 7, 16, 14)
         p.drawText(key_rect, Qt.AlignmentFlag.AlignCenter, key_num)
@@ -371,18 +382,20 @@ class RadialMenu(QWidget):
         # 1. Subtle Glow Ring
         glow_r = _HUB_R + 3.0
         glow_rect = QRectF(cx - glow_r, cy - glow_r, glow_r * 2.0, glow_r * 2.0)
-        p.setPen(QPen(QColor(99, 102, 241, 50 if self._hovered_index >= 0 else 25), 2.0))
+        glow_color = QColor(CursorBiteColors.ACCENT_GLOW)
+        glow_color.setAlpha(85 if self._hovered_index >= 0 else 40)
+        p.setPen(QPen(glow_color, 2.0))
         p.setBrush(Qt.BrushStyle.NoBrush)
         p.drawEllipse(glow_rect)
 
         # 2. Center Button Core Fill
         hub_grad = QRadialGradient(cx, cy, _HUB_R)
         if self._hovered_index >= 0:
-            hub_grad.setColorAt(0.0, QColor(24, 28, 46, 255))
-            hub_grad.setColorAt(1.0, QColor(12, 14, 24, 255))
+            hub_grad.setColorAt(0.0, CursorBiteColors.BACKGROUND_TERTIARY)
+            hub_grad.setColorAt(1.0, CursorBiteColors.BACKGROUND_PRIMARY)
         else:
-            hub_grad.setColorAt(0.0, QColor(18, 21, 34, 255))
-            hub_grad.setColorAt(1.0, QColor(10, 11, 18, 255))
+            hub_grad.setColorAt(0.0, CursorBiteColors.BACKGROUND_SECONDARY)
+            hub_grad.setColorAt(1.0, CursorBiteColors.BACKGROUND_PRIMARY)
 
         p.setPen(Qt.PenStyle.NoPen)
         p.setBrush(QBrush(hub_grad))
@@ -392,7 +405,7 @@ class RadialMenu(QWidget):
         if self._hovered_index >= 0:
             border_pen = QPen(CursorBiteColors.ACCENT_SECONDARY, 1.8)
         else:
-            border_pen = QPen(QColor(255, 255, 255, 32), 1.0)
+            border_pen = QPen(CursorBiteColors.BORDER_SUBTLE, 1.0)
         p.setPen(border_pen)
         p.setBrush(Qt.BrushStyle.NoBrush)
         p.drawEllipse(hub_rect)
@@ -415,14 +428,14 @@ class RadialMenu(QWidget):
 
         else:
             # Idle / Default State: Sleek Core Monogram
-            p.setFont(QFont("Segoe UI Variable Display", 11, QFont.Weight.Bold))
+            p.setFont(get_heading_font(size=11, bold=True))
             p.setPen(QPen(CursorBiteColors.ACCENT_SECONDARY))
             emblem_rect = QRectF(cx - 24, cy - 14, 48, 18)
             p.drawText(emblem_rect, Qt.AlignmentFlag.AlignCenter, "CB")
 
             # Status dot
             p.setFont(get_font(size=6))
-            p.setPen(QPen(CursorBiteColors.SUCCESS if self._has_selection else QColor("#64748B")))
+            p.setPen(QPen(CursorBiteColors.SUCCESS if self._has_selection else CursorBiteColors.TEXT_TERTIARY))
             dot_rect = QRectF(cx - 20, cy + 4, 40, 10)
             p.drawText(dot_rect, Qt.AlignmentFlag.AlignCenter, "●" if self._has_selection else "ready")
 

@@ -103,7 +103,6 @@ class OutputSanitizer:
         # If the output has "**Summary**\n... \n**Key Insights**\n...", extract the actual summary portion or clean up
         lines = text.splitlines()
         cleaned_lines = []
-        skip_section = False
 
         for line in lines:
             line_str = line.strip()

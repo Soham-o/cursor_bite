@@ -15,6 +15,22 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 
+# ── QApplication bootstrap ──────────────────────────────────────────
+#
+# Pytest imports every test module during collection, before any
+# fixture runs. Modules that import app.controller pull in app.events
+# at that point, which constructs the EventBus QObject singleton — and
+# constructing a QObject before any QApplication exists leaves it in a
+# state PyQt later invalidates ("wrapped C/C++ object ... has been
+# deleted") the moment a QApplication actually gets created by whatever
+# test's own `qapp` fixture runs first. Creating the QApplication here,
+# at conftest import time, guarantees one already exists before any
+# test module — and anything it imports at module scope — is collected.
+from PyQt6.QtWidgets import QApplication  # noqa: E402
+
+_qapp = QApplication.instance() or QApplication([])
+
+
 # ── Workaround: logging + asyncio under pytest ─────────────────────
 #
 # Since Python 3.12, LogRecord.__init__ calls asyncio.current_task()

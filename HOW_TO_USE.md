@@ -215,31 +215,9 @@ Right-click the **CB** icon in your taskbar notification area to access:
 
 ## 🔧 Optional Component Setup
 
-Cursor Bite runs with **graceful degradation**. If an optional component is not installed, the app still launches and all other features work normally.
+Cursor Bite runs with **graceful degradation**. If an optional component is not installed, the app still launches and all other features work normally — each one just tells you what to install if you try it before its engine is set up.
 
-### Ollama (Powers AI Summarize, Explain, Rewrite, Ask AI)
-1. Download Ollama from [ollama.com](https://ollama.com).
-2. Install and start Ollama.
-3. Open terminal and pull the recommended fast lightweight model:
-   ```cmd
-   ollama pull llama3.2
-   ```
-
-### Argos Translate (Powers Offline Translation)
-1. Install languages through the Python environment:
-   ```powershell
-   .\venv\Scripts\python.exe -m pip install argostranslate
-   ```
-2. Download language models:
-   ```powershell
-   .\venv\Scripts\argospm.exe update
-   .\venv\Scripts\argospm.exe install translate-es_en
-   .\venv\Scripts\argospm.exe install translate-en_es
-   ```
-
-### Tesseract OCR (Powers Screen Capture OCR)
-1. Download Windows installer from [UB-Mannheim/tesseract](https://github.com/UB-Mannheim/tesseract/wiki).
-2. Install to the standard path `C:\Program Files\Tesseract-OCR\tesseract.exe`.
+Full install steps for Ollama (AI), Argos Translate, and Tesseract OCR — including exact commands and how to verify each one — are in [SETUP_GUIDE.md](SETUP_GUIDE.md#part-2--optional-engines-install-only-what-you-want), so they're maintained in one place instead of drifting between two documents.
 
 ---
 

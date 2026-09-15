@@ -68,3 +68,71 @@ def test_installed_model_translation():
     res = translator.translate("Hola mundo", target_lang="en")
     if res.success:
         assert "hello" in res.data.lower() or "world" in res.data.lower()
+
+
+def test_tier3_probe_never_treats_english_as_its_own_evidence(monkeypatch):
+    """Regression test for the confirmed cause of Spanish text being
+    misdetected as English: the Tier-3 Argos probe used to iterate every
+    installed language *including English* and treat "produced more than
+    5 characters of output" as proof of a match. If `en` had any
+    translation object pointing back at itself, that identity-like
+    "translation" of ANY input satisfied the length check before a real
+    candidate language was ever tried, and the probe returned English
+    with 70% confidence no matter what the actual text was.
+
+    This forces Tier 1 (script) and Tier 2 (langdetect) to both fail, so
+    only the Tier-3 probe can produce an answer, and rigs the fake Argos
+    language list so that `en` would win first under the old, buggy
+    iteration order.
+    """
+    import sys
+    import types
+
+    translator = ArgosTranslationProvider()
+
+    # Force Tier 2 out of the running regardless of whether langdetect is
+    # actually installed in the environment running this test — a `None`
+    # entry in sys.modules makes `import langdetect` raise ImportError,
+    # same as it not being installed at all.
+    monkeypatch.setitem(sys.modules, "langdetect", None)
+
+    class FakeTranslation:
+        def __init__(self, output):
+            self._output = output
+
+        def translate(self, text):
+            return self._output
+
+    class FakeLang:
+        def __init__(self, code):
+            self.code = code
+
+    # `en` appears FIRST in the installed-languages list and has a
+    # translation "to itself" that just echoes the input back — exactly
+    # the identity-translation shape that used to win before the real
+    # Spanish model ever got a chance to run.
+    en = FakeLang("en")
+    en.get_translation = lambda other: FakeTranslation(
+        "Este es un texto en espanol para probar."
+    )
+
+    es = FakeLang("es")
+    es.get_translation = lambda other: FakeTranslation("Hello world")
+
+    fake_translate_module = types.ModuleType("argostranslate.translate")
+    fake_translate_module.get_installed_languages = lambda: [en, es]
+
+    fake_argostranslate = types.ModuleType("argostranslate")
+    fake_argostranslate.translate = fake_translate_module
+
+    monkeypatch.setitem(sys.modules, "argostranslate", fake_argostranslate)
+    monkeypatch.setitem(sys.modules, "argostranslate.translate", fake_translate_module)
+    monkeypatch.setattr(translator, "_ensure_ready", lambda: True)
+
+    lang, conf = translator.detect_language_with_confidence(
+        "Este es un texto en espanol para probar."
+    )
+
+    assert lang != "en", "must never confirm English via a translation of English to itself"
+    assert lang == "es"
+    assert conf < 0.7, "Tier-3 is a weak last resort and must not report high confidence"

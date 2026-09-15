@@ -19,7 +19,7 @@ class ActionContracts:
     def _detect_input_format(text: str) -> str:
         """Infer the structural format of the input text."""
         clean = text.strip()
-        lines = [l.strip() for l in clean.splitlines() if l.strip()]
+        lines = [line.strip() for line in clean.splitlines() if line.strip()]
 
         if not lines:
             return "empty"

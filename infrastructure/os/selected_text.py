@@ -22,7 +22,17 @@
 #   the result, letting the UI say which one it used.
 #
 # IMPORTANT: This module does NOT touch the clipboard on import.
+#
+# THREAD SAFETY: extract_text() is guarded by a lock. The controller can
+# legitimately trigger two extractions close together — an opportunistic
+# capture kicked off the moment the menu opens, and a second one if the
+# user picks an action before the first has resolved — and both go
+# through the single module-level `clipboard` snapshot/restore slot.
+# Without serializing them, two concurrent save() calls would silently
+# race and could hand one caller back the other's snapshot instead of
+# the user's real clipboard.
 
+import threading
 import time
 from typing import Optional
 
@@ -65,6 +75,7 @@ class SelectedTextProvider(TextProvider):
                 it. Set False for a selection-only provider.
         """
         self._allow_clipboard_fallback = allow_clipboard_fallback
+        self._lock = threading.Lock()
 
     # ── Interface Implementation ────────────────────────────────
 
@@ -92,6 +103,11 @@ class SelectedTextProvider(TextProvider):
               - "context_source": "selected_text" or "clipboard"
               - "clipboard_restored": whether the original was written back
         """
+        with self._lock:
+            return self._extract_text_locked(target_hwnd=target_hwnd)
+
+    def _extract_text_locked(self, target_hwnd: Optional[int] = None) -> ProcessingResult:
+        """The actual extraction. Always called with `self._lock` held."""
         protect = settings.privacy_clipboard_protection
 
         # Snapshot first so we can distinguish a fresh copy from leftovers.

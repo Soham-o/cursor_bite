@@ -64,6 +64,16 @@ class CursorBiteColors:
     OPACITY_MIN     = 0.80
     OPACITY_MAX     = 1.0
 
+    # Radial menu surface (translucent glass, not a solid dialog panel —
+    # kept as its own tokens rather than reusing BACKGROUND_* /
+    # SURFACE_* above, which are tuned for opaque dialog chrome)
+    MENU_BACKDROP      = QColor(10, 12, 19, 248)     # Outer ambient disc
+    MENU_SECTOR_IDLE   = QColor(22, 26, 38, 120)      # Idle wedge fill
+    MENU_SECTOR_HOVER  = QColor(99, 102, 241, 70)     # Hovered wedge fill (accent, restrained)
+    MENU_BORDER_IDLE   = QColor(255, 255, 255, 16)    # Idle wedge/ring hairline
+    MENU_BORDER_HOVER  = QColor(129, 140, 248, 210)   # Hovered wedge border
+    MENU_DIVIDER       = QColor(255, 255, 255, 12)
+
 
 # Map each action to its clean, unified theme metadata
 ACTION_THEME = {
