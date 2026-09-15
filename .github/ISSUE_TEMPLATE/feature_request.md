@@ -1,31 +1,22 @@
 ---
 name: Feature request
-about: Suggest an idea for Cursor Bite
-title: ""
+about: Suggest a useful improvement for Cursor Bite
+title: "feat: "
 labels: enhancement
 ---
 
-**What problem does this solve?**
+## Problem
 
-Describe the workflow interruption or friction you're trying to remove —
-not just the feature itself.
+What user problem would this feature solve?
 
-**Proposed solution**
+## Proposed solution
 
-**Which of these does it improve?** (see README.md's "important product
-principle" — this project stays deliberately small)
+Describe the behavior you would like.
 
-- [ ] Context (understanding what the user is looking at)
-- [ ] Intelligence (the quality/usefulness of an action's result)
-- [ ] Speed (time from hotkey to result)
-- [ ] Privacy (what leaves the device, what's retained)
-- [ ] Reliability (fewer failure modes, better degradation)
+## Alternatives considered
 
-**Cost/dependency impact**
+What other approaches did you consider?
 
-Does this require a paid API, account, or mandatory cloud service? Cursor
-Bite has zero mandatory cost by design — a new *optional* local/free engine
-behind an optional action is fine; anything that breaks "the app still works
-with none of the optional components installed" is not.
+## Privacy / local-first impact
 
-**Alternatives considered**
+Would this feature process or transmit user content? If yes, explain the expected boundary.

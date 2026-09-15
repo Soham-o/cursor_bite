@@ -2,6 +2,15 @@
 
 **Intelligence at your cursor.**
 
+<p align="center">
+  <a href="https://github.com/Soham-o/cursor_bite/stargazers"><img src="https://img.shields.io/github/stars/Soham-o/cursor_bite?style=flat-square" alt="GitHub stars"></a>
+  <a href="https://github.com/Soham-o/cursor_bite/issues"><img src="https://img.shields.io/github/issues/Soham-o/cursor_bite?style=flat-square" alt="GitHub issues"></a>
+  <a href="https://github.com/Soham-o/cursor_bite/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Soham-o/cursor_bite?style=flat-square" alt="MIT License"></a>
+  <img src="https://img.shields.io/badge/Python-3.11%2B-blue?style=flat-square" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/Platform-Windows-lightgrey?style=flat-square" alt="Windows">
+  <img src="https://img.shields.io/badge/AI-Local--First-success?style=flat-square" alt="Local first AI">
+</p>
+
 A privacy-first, local-first Windows assistant that appears around your
 mouse cursor when you press a hotkey — translate, explain, summarize,
 rewrite, ask AI, search, or pull text off the screen, without leaving
@@ -59,6 +68,27 @@ starts and runs, disabling exactly the one action each is missing.
 **At startup, Cursor Bite performs zero network requests and initializes
 zero optional components.** Nothing is imported, probed, or connected to
 until an action needs it.
+
+## Keyboard Reference
+
+Once the radial menu is open:
+
+| Key | Action |
+|---|---|
+| `Ctrl+Alt+B` | Open Cursor Bite |
+| `1` | Translate |
+| `2` | Summarize |
+| `3` | Explain |
+| `4` | Search Web |
+| `5` | Settings |
+| `6` | Capture OCR |
+| `7` | Rewrite |
+| `8` | Ask AI |
+| Arrow keys | Move between sectors |
+| `Enter` / `Space` | Activate the highlighted sector |
+| `Esc` | Close / cancel |
+
+See [HOW_TO_USE.md](HOW_TO_USE.md) for the full walkthrough.
 
 ## Privacy Model
 
@@ -248,8 +278,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Please also read
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for the threat model, how to report a
-vulnerability, and the detector's known limitations.
+See [SECURITY.md](SECURITY.md) for how to report a vulnerability. The
+sensitive-data detector is regex-based and documented as a safety net, not
+a guarantee — see `infrastructure/privacy/detector.py` for exactly which
+patterns it covers.
 
 ## Important product principle
 
@@ -261,3 +293,10 @@ large one.
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+<p align="center">
+  <strong>Built by Soham Panda</strong><br>
+  <sub>AI engineering • intelligent software • privacy-first systems</sub>
+</p>

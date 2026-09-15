@@ -1,36 +1,35 @@
 ---
 name: Bug report
-about: Something in Cursor Bite doesn't work the way it should
-title: ""
+about: Report a reproducible problem in Cursor Bite
+title: "bug: "
 labels: bug
 ---
 
-**What happened**
+## What happened?
 
-A clear description of the bug.
+Describe the problem clearly.
 
-**What you expected instead**
-
-**Steps to reproduce**
+## Steps to reproduce
 
 1.
 2.
 3.
 
-**Environment**
+## Expected behavior
 
-- Windows version (10/11, build number):
-- Cursor Bite version / commit:
-- Running from source (`python main.py`) or a packaged EXE?
-- Relevant optional components installed (Ollama / Argos / Tesseract), if
-  the bug involves Translate, Explain, Summarize, Rewrite, Ask AI, or
-  Capture Text:
+What did you expect to happen?
 
-**Log excerpt**
+## Environment
 
-Paste the relevant lines from `%USERPROFILE%\.cursor_bite\cursor_bite.log`.
-The log never contains your selected text, prompts, translations, or search
-queries — only action names, durations, and error types — so it's safe to
-paste in full or near-full.
+- Windows version:
+- Python version:
+- Cursor Bite version/commit:
+- Optional components installed (Ollama/Tesseract/Argos):
 
-**Anything else**
+## Logs
+
+Please remove any personal data, credentials, tokens, or captured text before sharing logs.
+
+```text
+paste sanitized logs here
+```
