@@ -16,10 +16,18 @@ mouse cursor when you press a hotkey — translate, explain, summarize,
 rewrite, ask AI, search, or pull text off the screen, without leaving
 whatever you're already looking at.
 
-> **Screenshot / demo GIF:** not yet captured for this README. If you're
-> evaluating this project, the fastest way to see it is to run it —
-> [Quick Start](#quick-start) takes about two minutes on a machine that
-> already has Python.
+<p align="center">
+  <img src="docs/images/radial-menu.png" width="260" alt="Cursor Bite's radial menu: eight numbered sectors around a central hub, with the Translate sector highlighted">
+</p>
+
+<p align="center"><sub>The radial menu widget from <code>ui/radial_menu.py</code>, rendered
+offscreen by <code>scripts/render_radial_preview.py</code>. Fonts may differ
+slightly from Windows.</sub></p>
+
+> **Demo GIF:** not yet captured. A recording of the full flow (hotkey →
+> menu → result panel) needs a Windows machine. The fastest way to see it is
+> to run it: [Quick Start](#quick-start) takes about two minutes on a machine
+> that already has Python.
 
 ## Why
 
@@ -178,6 +186,7 @@ cursor_bite/
 ├── config/           defaults + config.json loader
 ├── utils/            logging, the run_async threading helper
 ├── tests/            unit / integration / security
+├── scripts/          dev utilities (README preview render)
 └── design/           a browser-based UI/UX prototype — not the shipped app,
                        see design/web-prototype/README.md
 ```
