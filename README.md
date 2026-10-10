@@ -100,21 +100,14 @@ See [HOW_TO_USE.md](HOW_TO_USE.md) for the full walkthrough.
 
 ## Privacy Model
 
-```
-   Context
-      │
-      ▼
- Privacy Gateway ── detects sensitive data (emails, keys, tokens,
-      │              credit cards, private IPs, credential pairs)
-      │
-      ├── LOCAL PROCESSING ──────────────────────► always allowed,
-      │                                              sensitive or not
-      │
-      └── requires EXTERNAL (Search Web only)
-              │
-              ├── clean text ──────────────────────► allowed
-              └── sensitive text ──► blocked, or a redacted-preview
-                                     consent prompt, per your settings
+```mermaid
+flowchart TD
+    C[Selected text or screen capture] --> G[Privacy gateway scans for emails, API keys,<br/>tokens, card numbers, private IPs, credential pairs]
+    G --> Q{Does the action<br/>leave the device?}
+    Q -->|"No: Translate, Explain, Summarize,<br/>Rewrite, Ask AI, OCR"| L[Processed locally,<br/>sensitive or not]
+    Q -->|Yes: Search Web| E{Sensitive<br/>data found?}
+    E -->|No| S[Sent to DuckDuckGo]
+    E -->|Yes| B[Blocked, or ask consent<br/>with a redacted preview]
 ```
 
 - **Local first.** Translation, AI, and OCR all run on your machine.
@@ -138,24 +131,28 @@ limitations.
 
 ## Architecture
 
-```
-User presses hotkey
-        │
-        ▼
-  Hotkey Listener (RegisterHotKey / WM_HOTKEY, native Qt event filter)
-        │
-        ▼
-  Radial Menu opens immediately at the cursor
-        │  (selection capture happens off the UI thread, in parallel —
-        │   the menu never waits on it)
-        ▼
-  User selects an action
-        │
-        ▼
-  Pipeline.prepare()  →  Privacy Gateway  →  [optional consent dialog]  →  Pipeline.execute()
-        │
-        ▼
-  Result panel, near the cursor
+```mermaid
+sequenceDiagram
+    actor U as You
+    participant H as Hotkey listener<br/>(RegisterHotKey)
+    participant C as Controller<br/>(UI thread)
+    participant W as Worker threads<br/>(capture, pipeline)
+    participant G as Privacy gateway
+    U->>H: Ctrl+Alt+B
+    H->>C: show radial menu at cursor now
+    C-)W: capture selection in parallel
+    U->>C: pick an action
+    C->>W: prepare()
+    W->>G: evaluate(text, requires_external)
+    G-->>W: allow / needs consent / block
+    W-->>C: prepared request
+    opt needs consent (Search Web with sensitive text)
+        C->>U: consent dialog with redacted preview
+        U-->>C: approve or decline
+    end
+    C->>W: execute()
+    W-->>C: result
+    C->>U: result panel near the cursor
 ```
 
 Ports-and-adapters layering: `ui/` and `app/` depend on `domain/`
